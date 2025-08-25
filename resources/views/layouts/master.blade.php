@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Landing Page')</title>
+    <link rel="icon" type="png" href="{{ asset('images/Logo-BMKG.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
