@@ -177,10 +177,23 @@
             const lon = urlParams.get('lon');
             const nama = urlParams.get('nama');
             if (lat && lon) {
-                map.setView([lat, lon], 14);
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup(`<b>${nama ?? 'Lokasi UPT'}</b>`).openPopup();
-            }
+    // Cari index satker berdasarkan koordinat
+    const index = satkers.findIndex(s =>
+        String(s.latitude) === String(lat) && String(s.longitude) === String(lon)
+    );
+
+    if (index !== -1) {
+        // Kalau ketemu di data satker -> langsung buka sidebar
+        selectSatker(index);
+    } else {
+        // Kalau nggak ketemu, tetap tampilkan marker biasa
+        map.setView([lat, lon], 14);
+        const tempMarker = L.marker([lat, lon], { icon: selectedIcon }).addTo(map);
+        tempMarker.bindPopup(`<b>${nama ?? 'Lokasi UPT'}</b>`).openPopup();
+    }
+}
+
+
         });
     </script>
 
