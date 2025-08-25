@@ -2,7 +2,7 @@
 @section('title', 'Data UPT')
 @section('content')
 
-<div class="overflow-x-auto">
+<div class="overflow-x-auto max-w-7xl mx-auto mb-20">
     <table class="w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
         <thead class="bg-gradient-to-r from-[#01377D] to-blue-600 text-white">
             <tr>
