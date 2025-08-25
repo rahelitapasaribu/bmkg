@@ -34,7 +34,7 @@
 
 
     <!-- Konten Halaman -->
-    <main class="w-full max-w-7xl px-6 mt-24">
+    <main class="w-full px-6 mt-24 mx-auto">
         @yield('content')
     </main>
 
