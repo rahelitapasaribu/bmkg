@@ -92,15 +92,19 @@
                         </div>
 
                         <!-- CTA Button -->
-                        <button
-                            class="group inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
-                            <span>Mulai Eksplorasi</span>
-                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                            </svg>
-                        </button>
+                        <a href="{{ route('map') }}"
+                            class="group inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 
+                            hover:from-blue-600 hover:to-indigo-700 text-white font-semibold px-6 py-3 
+                            rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 
+                            transition-all duration-300">
+                        <span>Mulai Eksplorasi</span>
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </a>
+
                     </div>
 
                     <!-- Map Section -->

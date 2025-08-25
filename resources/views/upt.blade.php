@@ -19,25 +19,22 @@
                 @foreach($upts as $index => $upt)
                 <tr>
                     <td class="px-4 py-3">{{ $index+1 }}</td>
-                    <td class="px-4 py-3">
-                        <a href="{{ route('map') }}?lat={{ $upt->latitude }}&lon={{ $upt->longitude }}&nama={{ urlencode($upt->nama_satker) }}"
-                           class="text-blue-700 hover:underline font-semibold">
-                            {{ $upt->nama_satker}}
-                        </a>
+                    <td class="px-4 py-3 font-semibold text-gray-800">
+                        {{ $upt->nama_satker }}
                     </td>
                     <td class="px-4 py-3">{{ $upt->nama_provinsi }}</td>
                     <td class="px-4 py-3">{{ $upt->longitude ?? '-' }}</td>
                     <td class="px-4 py-3">{{ $upt->latitude ?? '-' }}</td>
                     <td class="px-4 py-3 text-center">
                         @if($upt->longitude && $upt->latitude)
-                            <button onclick="openMapModal({{ $upt->id }}, '{{ $upt->nama_satker}}', {{ $upt->latitude }}, {{ $upt->longitude }})"
-                                class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow mr-2">
-                                <i class="fas fa-map-marker-alt mr-1"></i> Lihat Map
-                            </button>
-                        @endif
-                        </button>
-                    </td>
-                </tr>
+                    <a href="{{ route('map') }}?lat={{ $upt->latitude }}&lon={{ $upt->longitude }}&nama={{ urlencode($upt->nama_satker) }}"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow mr-2 inline-flex items-center">
+                        <i class="fas fa-map-marker-alt mr-1"></i> Lihat Map
+                    </a>
+                @endif
+            </td>
+        </tr>
+
                 @endforeach
             </tbody>
         </table>
