@@ -10,8 +10,8 @@ class MapController extends Controller
 {
     public function index()
     {
-        // Ambil semua satker beserta provinsi dan alat yang dimilikinya
-        $satkers = Satker::with(['provinsi', 'alatSatker.alat'])->get();
+        // Ambil semua satker beserta provinsi, alat, dan staf
+        $satkers = Satker::with(['provinsi', 'alatSatker.alat', 'staf'])->get();
 
         // Ambil semua provinsi untuk dropdown filter
         $provinsi = Provinsi::all();

@@ -57,12 +57,29 @@
                 </div>
 
                 <!-- Pegawai Content -->
-                <div id="pegawaiContent" class="space-y-2">
-                    <p class="text-gray-700">ASN Laki-laki: <span id="asnLaki">-</span></p>
-                    <p class="text-gray-700">ASN Perempuan: <span id="asnPerempuan">-</span></p>
-                    <p class="text-gray-700">PPNPN Laki-laki: <span id="ppnpnLaki">-</span></p>
-                    <p class="text-gray-700">PPNPN Perempuan: <span id="ppnpnPerempuan">-</span></p>
-                </div>
+<div id="pegawaiContent" class="space-y-2">
+    <table class="table-auto w-full border border-gray-200">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-4 py-2 border">Kategori</th>
+                <th class="px-4 py-2 border">Laki-laki</th>
+                <th class="px-4 py-2 border">Perempuan</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="px-4 py-2 border">ASN</td>
+                <td class="px-4 py-2 border"><span id="asnLaki">-</span></td>
+                <td class="px-4 py-2 border"><span id="asnPerempuan">-</span></td>
+            </tr>
+            <tr>
+                <td class="px-4 py-2 border">PPNPN</td>
+                <td class="px-4 py-2 border"><span id="ppnpnLaki">-</span></td>
+                <td class="px-4 py-2 border"><span id="ppnpnPerempuan">-</span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
                 <!-- Alat Content -->
                 <div id="alatContent" class="hidden">
@@ -89,14 +106,14 @@
 
 
     <!-- Collapse Button -->
-    {{-- <button id="collapseBtn" onclick="togglePanel()"
+    <button id="collapseBtn" onclick="togglePanel()"
         class="fixed top-1/2 -translate-y-1/2 z-30 bg-white hover:bg-[#7c3aed] hover:text-white transition-all duration-200 rounded-full shadow-lg flex items-center justify-center"
         style="width:48px;height:48px;display:none;">
         <svg id="collapseIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
             xmlns="http://www.w3.org/2000/svg">
             <polygon points="8,12 16,6 16,18" />
         </svg>
-    </button> --}}
+    </button> 
 
 
     <!-- Leaflet JS -->
@@ -187,10 +204,20 @@
             map.setView([s.latitude, s.longitude], 10);
 
             // tampilkan panel & handle
+            // tampilkan panel & handle
             const panel = document.getElementById("sidePanel");
+
+            // selalu buka full panel kalau pilih satker baru
             panel.classList.remove("translate-x-full", "collapsed");
+            panel.style.width = "";
+            panel.style.minWidth = "";
+            panel.style.background = "";
+            const inner = panel.querySelector(".p-6");
+            if (inner) inner.style.display = "block";
+
             document.getElementById("collapseBtn").style.display = "flex";
             positionHandle();
+
 
             // update prev/next
             document.getElementById("prevBtn").disabled = index === 0;
@@ -337,8 +364,10 @@
                 return;
             }
             // panel terbuka: letakkan di tepi kiri panel (offsetWidth - half of button)
-            const panelWidth = panel.offsetWidth || 480; // fallback ±30rem
-            btn.style.right = (panelWidth - 24) + "px"; // 24px = setengah diameter tombol (48px)
+            const panelWidth = panel.offsetWidth || 480;
+            // tambah offset biar tombol keluar sedikit
+            btn.style.right = (panelWidth - 24 + 16) + "px"; // +16px nongol keluar
+
         }
 
         // ===== builder tabel alat =====

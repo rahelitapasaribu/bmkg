@@ -19,6 +19,10 @@ class Satker extends Model
 
     public function alatSatker()
     {
-        return $this->belongsTo(alatSatker::class, 'id_satker');
+        return $this->hasMany(AlatSatker::class, 'id_satker');
+    }
+    public function staf()
+    {
+        return $this->hasOne(Staf::class, 'id_satker');
     }
 }
