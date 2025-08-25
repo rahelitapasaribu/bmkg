@@ -1,44 +1,42 @@
 @extends('layouts.master')
 @section('title', 'Data UPT')
 @section('content')
-<div class="container mx-auto px-6 py-8">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Data UPT</h2>
-    <div class="overflow-x-auto">
-        <table class="w-full bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
-            <thead class="bg-gray-100 text-gray-700">
-                <tr>
-                    <th class="px-4 py-3 text-left w-12">No</th>
-                    <th class="px-4 py-3 text-left">Nama UPT</th>
-                    <th class="px-4 py-3 text-left">Provinsi</th>
-                    <th class="px-4 py-3 text-left">Longitude</th>
-                    <th class="px-4 py-3 text-left">Latitude</th>
-                    <th class="px-4 py-3 text-center">Detail Lokasi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 text-gray-700">
-                @foreach($upts as $index => $upt)
-                <tr>
-                    <td class="px-4 py-3">{{ $index+1 }}</td>
-                    <td class="px-4 py-3 font-semibold text-gray-800">
-                        {{ $upt->nama_satker }}
-                    </td>
-                    <td class="px-4 py-3">{{ $upt->nama_provinsi }}</td>
-                    <td class="px-4 py-3">{{ $upt->longitude ?? '-' }}</td>
-                    <td class="px-4 py-3">{{ $upt->latitude ?? '-' }}</td>
-                    <td class="px-4 py-3 text-center">
-                        @if($upt->longitude && $upt->latitude)
-                    <a href="{{ route('map') }}?lat={{ $upt->latitude }}&lon={{ $upt->longitude }}&nama={{ urlencode($upt->nama_satker) }}"
-                        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow mr-2 inline-flex items-center">
-                        <i class="fas fa-map-marker-alt mr-1"></i> Lihat Map
-                    </a>
-                @endif
-            </td>
-        </tr>
 
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+<div class="overflow-x-auto">
+    <table class="w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+        <thead class="bg-gradient-to-r from-[#01377D] to-blue-600 text-white">
+            <tr>
+                <th class="px-6 py-3 text-left text-sm font-semibold tracking-wide">No</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold tracking-wide">Nama UPT</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold tracking-wide">Provinsi</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold tracking-wide">Longitude</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold tracking-wide">Latitude</th>
+                <th class="px-6 py-3 text-center text-sm font-semibold tracking-wide">Detail Lokasi</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-gray-700">
+            @foreach($upts as $index => $upt)
+            <tr class="hover:bg-blue-50 transition-colors">
+                <td class="px-6 py-3 text-sm text-gray-600">{{ $index+1 }}</td>
+                <td class="px-6 py-3 font-medium text-gray-800">{{ $upt->nama_satker }}</td>
+                <td class="px-6 py-3 text-sm">{{ $upt->nama_provinsi }}</td>
+                <td class="px-6 py-3 text-sm">{{ $upt->longitude ?? '-' }}</td>
+                <td class="px-6 py-3 text-sm">{{ $upt->latitude ?? '-' }}</td>
+                <td class="px-6 py-3 text-center">
+                    @if($upt->longitude && $upt->latitude)
+                        <a href="{{ route('map') }}?lat={{ $upt->latitude }}&lon={{ $upt->longitude }}&nama={{ urlencode($upt->nama_satker) }}"
+                           class="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg shadow transition">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Lihat Map</span>
+                        </a>
+                    @else
+                        <span class="text-gray-400 italic">Tidak tersedia</span>
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>
 
 <!-- Modal Detail UPT -->
