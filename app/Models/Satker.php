@@ -16,4 +16,9 @@ class Satker extends Model
     {
         return $this->belongsTo(Provinsi::class, 'id_provinsi');
     }
+
+    public function alatSatker()
+    {
+        return $this->belongsTo(alatSatker::class, 'id_satker');
+    }
 }

@@ -4,7 +4,7 @@
 <div class="container mx-auto px-6 py-8">
     <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Data UPT</h2>
     <div class="overflow-x-auto">
-        <table class="w-full border border-gray-200 rounded-lg shadow-md overflow-hidden">
+        <table class="w-full bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
             <thead class="bg-gray-100 text-gray-700">
                 <tr>
                     <th class="px-4 py-3 text-left w-12">No</th>

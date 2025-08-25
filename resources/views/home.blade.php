@@ -12,38 +12,18 @@
     </style>
 
     <!-- Hero Section -->
-    <div class="relative overflow-hidden w-full">
+    <div class="relative overflow-visible w-full">
 
-        <!-- Decorative Elements -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-200/30 rounded-full blur-3xl animate-pulse"></div>
-            <div
-                class="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000">
-            </div>
-            <div
-                class="absolute top-1/2 right-1/4 w-32 h-32 bg-indigo-300/40 rounded-full blur-2xl animate-bounce delay-500">
-            </div>
-        </div>
-
-        <!-- Konten utama full lebar -->
-        <div class="relative z-10 w-full px-6 py-16">
+        <div class="relative z-10 max-w-7xl mx-auto px-6 py-16">
 
             <!-- Header Section -->
             <div class="text-center mb-16 animate-fade-in-up">
-                <div
-                    class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-6 shadow-lg">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
-
                 <h1
-                    class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 leading-tight">
+                    class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 leading-normal overflow-visible">
                     Selamat Datang
                 </h1>
                 <h2 class="text-2xl md:text-3xl font-semibold text-gray-700 mb-4">
-                    Sistem Informasi BMKG
+                    Sistem Informasi BMKG Wilayah III
                 </h2>
                 <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full mx-auto"></div>
             </div>
@@ -51,12 +31,11 @@
             <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-16 w-full">
 
-                <!-- Left Column: Mascot -->
+                <!-- Left Column: Maskot -->
                 <div class="flex justify-center lg:justify-start animate-fade-in-left">
                     <div class="relative group">
-                        <!-- Hapus background putih di belakang maskot -->
                         <img src="{{ asset('images/maskot_bmkg.svg') }}" alt="Maskot BMKG"
-                            class="w-72 md:w-80 lg:w-96 transform group-hover:scale-105 transition-transform duration-500 filter drop-shadow-lg">
+                            class="w-80 md:w-96 lg:w-[28rem] transform group-hover:scale-105 transition-transform duration-500 filter drop-shadow-lg ml-6">
 
                         <!-- Floating Elements -->
                         <div class="absolute -top-4 -right-4 w-8 h-8 bg-yellow-400 rounded-full animate-ping opacity-75">
@@ -84,9 +63,9 @@
                             <div>
                                 <h3 class="text-xl font-semibold text-gray-800 mb-2">Informasi Terintegrasi</h3>
                                 <p class="text-lg text-gray-600 leading-relaxed">
-                                    Pantau data dan informasi UPT dengan mudah dan akurat.
-                                    Sistem ini menyediakan akses cepat dan terintegrasi untuk seluruh unit kerja
-                                    dalam satu platform yang user-friendly.
+                                    Pantau data dan informasi UPT dengan mudah.
+                                    Sistem ini menyediakan akses untuk seluruh unit kerja
+                                    dalam satu platform.
                                 </p>
                             </div>
                         </div>
@@ -97,13 +76,13 @@
                             hover:from-blue-600 hover:to-indigo-700 text-white font-semibold px-6 py-3 
                             rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 
                             transition-all duration-300">
-                        <span>Mulai Eksplorasi</span>
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </a>
+                            <span>Mulai Eksplorasi</span>
+                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
 
                     </div>
 
@@ -121,7 +100,7 @@
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cakupan Nasional</h3>
+                            <h3 class="text-lg font-semibold text-gray-800">Cakupan BMKG Wilayah III</h3>
                         </div>
 
                         <div class="relative group cursor-pointer">
@@ -133,7 +112,7 @@
                         </div>
 
                         <p class="text-sm text-gray-600 mt-3 text-center">
-                            Melayani seluruh wilayah Indonesia dengan jaringan UPT terpadu
+                            Melayani seluruh UPT yang berada dibawah BMKG Wilayah III
                         </p>
                     </div>
                 </div>
@@ -141,7 +120,7 @@
         </div>
     </div>
     <!-- Custom Styles untuk Animasi -->
-    {{-- <style>
+    <style>
         @keyframes fade-in-up {
             from {
                 opacity: 0;
@@ -193,7 +172,7 @@
         .shadow-3xl {
             box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
         }
-    </style> --}}
+    </style>
 @endsection
 
 @section('footer')
