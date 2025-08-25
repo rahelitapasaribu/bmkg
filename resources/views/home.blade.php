@@ -190,5 +190,8 @@
             box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
         }
     </style> --}}
-@include('layouts.footer')
+@endsection
+
+@section('footer')
+    @include('layouts.footer')
 @endsection

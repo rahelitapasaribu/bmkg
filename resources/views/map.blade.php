@@ -11,29 +11,36 @@
 
     <!-- Side Panel -->
     <div id="sidePanel"
-     class="fixed top-4 right-4 h-[calc(100%-2rem)] w-96 bg-gradient-to-b from-white to-gray-50 shadow-xl transition-transform duration-300 ease-in-out z-20 overflow-y-auto flex flex-col rounded-2xl translate-x-full">
+        class="fixed top-4 right-4 h-[calc(100%-2rem)] w-96 bg-gradient-to-b from-white to-gray-50 shadow-xl transition-transform duration-300 ease-in-out z-20 overflow-y-auto flex flex-col rounded-2xl translate-x-full">
         <div class="p-6 flex flex-col h-full">
             <!-- Navigation and Close Buttons -->
             <div class="flex justify-between items-center mb-4 -mt-2">
                 <div class="flex gap-2">
-                    <button id="prevBtn" onclick="navigateSatker(-1)" class="bg-[#01377D] text-white w-8 h-8 rounded-full hover:bg-[#7c3aed] transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center">
+                    <button id="prevBtn" onclick="navigateSatker(-1)"
+                        class="bg-[#01377D] text-white w-8 h-8 rounded-full hover:bg-[#7c3aed] transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center">
                         &lt;
                     </button>
-                    <button id="nextBtn" onclick="navigateSatker(1)" class="bg-[#01377D] text-white w-8 h-8 rounded-full hover:bg-[#7c3aed] transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center">
+                    <button id="nextBtn" onclick="navigateSatker(1)"
+                        class="bg-[#01377D] text-white w-8 h-8 rounded-full hover:bg-[#7c3aed] transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center">
                         &gt;
                     </button>
                 </div>
                 <!-- Close Button -->
-                <button onclick="closePanel()" class="text-[#7c3aed] hover:text-[#01377D] transition-colors duration-200 text-xl font-semibold flex items-center gap-2 group">
+                <button onclick="closePanel()"
+                    class="text-[#7c3aed] hover:text-[#01377D] transition-colors duration-200 text-xl font-semibold flex items-center gap-2 group">
                     <span class="group-hover:scale-110 transition-transform">✖</span> Tutup
                 </button>
             </div>
             <!-- Panel Content -->
             <div class="flex-1">
-                <h2 id="panelTitle" class="text-2xl font-bold text-[#01377D] mb-6 bg-gradient-to-r from-[#01377D] to-[#7c3aed] bg-clip-text text-transparent">Detail Satker</h2>
+                <h2 id="panelTitle"
+                    class="text-2xl font-bold text-[#01377D] mb-6 bg-gradient-to-r from-[#01377D] to-[#7c3aed] bg-clip-text text-transparent">
+                    Detail Satker</h2>
                 <div class="space-y-4">
-                    <p class="text-gray-700"><span class="font-semibold text-[#01377D]">Provinsi:</span> <span id="panelProvinsi" class="text-gray-600"></span></p>
-                    <p class="text-gray-700"><span class="font-semibold text-[#01377D]">Lokasi:</span> <span id="panelLokasi" class="text-gray-600"></span></p>
+                    <p class="text-gray-700"><span class="font-semibold text-[#01377D]">Provinsi:</span> <span
+                            id="panelProvinsi" class="text-gray-600"></span></p>
+                    <p class="text-gray-700"><span class="font-semibold text-[#01377D]">Lokasi:</span> <span
+                            id="panelLokasi" class="text-gray-600"></span></p>
                 </div>
             </div>
             <!-- Footer/Accent -->
@@ -42,12 +49,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Dropdown Filter Provinsi -->
+    <div class="absolute top-4 left-4 z-30 bg-white shadow-md rounded-lg p-2">
+        <select id="provinsiFilter" onchange="filterByProvinsi()"
+            class="px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">-- Semua Provinsi --</option>
+            @foreach ($provinsi as $p)
+                <option value="{{ $p->id }}">{{ $p->nama_provinsi }}</option>
+            @endforeach
+        </select>
+    </div>
+
+
     <!-- Collapse Button -->
-    <button id="collapseBtn"
-        onclick="togglePanel()"
+    <button id="collapseBtn" onclick="togglePanel()"
         class="fixed top-1/2 -translate-y-1/2 z-30 bg-white hover:bg-[#7c3aed] hover:text-white transition-all duration-200 rounded-full shadow-lg"
         style="right: calc(24rem - 2rem); width: 48px; height: 48px; display: none; align-items: center; justify-content: center;">
-        <svg id="collapseIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <svg id="collapseIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
             <polygon points="8,12 16,6 16,18" />
         </svg>
     </button>
@@ -78,10 +98,14 @@
             shadowSize: [41, 41]
         });
 
-        var map = L.map('map', { zoomControl: false })
+        var map = L.map('map', {
+                zoomControl: false
+            })
             .setView([-2.5489, 118.0149], 6);
 
-        L.control.zoom({ position: 'bottomleft' }).addTo(map);
+        L.control.zoom({
+            position: 'bottomleft'
+        }).addTo(map);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -89,7 +113,9 @@
 
         // Loop marker dari database
         satkers.forEach(function(s, index) {
-            var marker = L.marker([s.latitude, s.longitude], { icon: defaultIcon }).addTo(map);
+            var marker = L.marker([s.latitude, s.longitude], {
+                icon: defaultIcon
+            }).addTo(map);
             markers.push(marker);
 
             // Popup saat hover
@@ -182,6 +208,42 @@
                     .bindPopup(`<b>${nama ?? 'Lokasi UPT'}</b>`).openPopup();
             }
         });
+
+        function filterByProvinsi() {
+            const selectedProvinsi = document.getElementById("provinsiFilter").value;
+
+            // hapus semua marker dari map
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            let filtered = [];
+
+            // tampilkan marker sesuai filter
+            satkers.forEach(function(s, index) {
+                if (!selectedProvinsi || s.id_provinsi == selectedProvinsi) {
+                    var marker = L.marker([s.latitude, s.longitude], {
+                        icon: defaultIcon
+                    }).addTo(map);
+                    markers.push(marker);
+
+                    marker.bindTooltip(`<b>${s.nama_satker}</b><br>${s.provinsi?.nama_provinsi ?? '-'}`);
+
+                    marker.on("click", function() {
+                        selectSatker(index);
+                    });
+
+                    filtered.push([s.latitude, s.longitude]);
+                }
+            });
+
+            // atur zoom sesuai provinsi
+            if (!selectedProvinsi) {
+                map.setView([-2.5489, 118.0149], 6); // default zoom Indonesia
+            } else if (filtered.length > 0) {
+                const bounds = L.latLngBounds(filtered);
+                map.fitBounds(bounds);
+            }
+        }
     </script>
 
     <style>
@@ -192,18 +254,22 @@
             min-width: 0 !important;
             overflow: visible !important;
         }
+
         #sidePanel.translate-x-full {
             display: none !important;
         }
+
         #collapseBtn {
             transition: all 0.3s ease-in-out;
         }
+
         #collapseBtn:hover {
             transform: scale(1.1);
         }
+
         #sidePanel {
             backdrop-filter: blur(5px);
-            background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(249,250,251,0.95));
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(249, 250, 251, 0.95));
         }
     </style>
 @endsection

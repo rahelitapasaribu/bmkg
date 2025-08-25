@@ -38,6 +38,9 @@
         @yield('content')
     </main>
 
+    {{-- Footer opsional --}}
+    @yield('footer')
+
 </body>
 
 </html>
