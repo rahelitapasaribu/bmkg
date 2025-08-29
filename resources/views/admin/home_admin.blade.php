@@ -1,11 +1,19 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Dashboard Admin')
-@section('page-title', 'Dashboard')
+@section('title', 'Home Admin')
 
 @section('content')
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Selamat Datang 🎉</h2>
-        <p class="text-gray-600">Ini halaman utama admin. Silakan pilih menu di sidebar untuk mulai mengelola data.</p>
+    <!-- Welcome Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-black drop-shadow-md">Welcome to BMKG Admin</h1>
+        <p class="text-black/90 mt-2 text-lg">Manage your meteorological data and operations efficiently</p>
+    </div>
+
+    <!-- Content Card -->
+    <div class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl p-8 border border-white/30">
+        <div class="text-center py-6">
+            <h3 class="text-xl font-semibold mb-3">Your content will appear here</h3>
+            <p class="text-gray-500">This is a modern, responsive admin panel layout with Tailwind CSS.</p>
+        </div>
     </div>
 @endsection

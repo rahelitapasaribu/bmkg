@@ -5,6 +5,9 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\UPTController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\DashboardController;
+// use App\Http\Controllers\Admin\AdminUptController;
+// use App\Http\Controllers\Admin\PegawaiController;
 
 // ==========================
 // Public Routes
@@ -23,9 +26,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ==========================
 // Admin Routes (auth only)
 // ==========================
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\AdminUptController;
-use App\Http\Controllers\Admin\PegawaiController;
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/home', function () {
@@ -34,14 +34,4 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // halaman Data (sementara)
-    Route::get('/data', function () {
-        return view('admin.data.index');
-    })->name('data.index');
-
-    // CRUD UPT
-    Route::resource('upt', AdminUptController::class);
-
-    // CRUD Pegawai
-    Route::resource('pegawai', PegawaiController::class);
 });
