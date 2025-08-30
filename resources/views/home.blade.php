@@ -118,6 +118,7 @@
                 </div>
             </div>
         </div>
+
     </div>
     <!-- Custom Styles untuk Animasi -->
     <style>
@@ -172,7 +173,27 @@
         .shadow-3xl {
             box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
         }
+
     </style>
+
+    <!-- Script Modal -->
+    <script>
+        function openModal() {
+            document.getElementById("loginModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("loginModal").style.display = "none";
+        }
+
+        // Close modal jika klik luar form
+        window.onclick = function(event) {
+            let modal = document.getElementById("loginModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 @endsection
 
 @section('footer')
