@@ -8,8 +8,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OlaController;
 use App\Http\Controllers\Admin\SlaController;
-// use App\Http\Controllers\Admin\AdminUptController;
-// use App\Http\Controllers\Admin\PegawaiController;
 
 // ==========================
 // Public Routes
@@ -30,12 +28,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ==========================
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
-    Route::get('/home', function () {
-        return view('admin.home_admin');
-    })->name('home');
-
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/ola', [OlaController::class, 'index'])->name('ola.index');
-    Route::get('/sla', [SlaController::class, 'index'])->name('sla.index');
 
+    // OLA
+    Route::resource('ola', App\Http\Controllers\Admin\OlaController::class);
+    
+    // SLA
+    Route::resource('sla', App\Http\Controllers\Admin\SlaController::class);
 });
