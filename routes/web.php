@@ -6,6 +6,8 @@ use App\Http\Controllers\MapController;
 use App\Http\Controllers\UPTController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OlaController;
+use App\Http\Controllers\Admin\SlaController;
 // use App\Http\Controllers\Admin\AdminUptController;
 // use App\Http\Controllers\Admin\PegawaiController;
 
@@ -33,5 +35,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     })->name('home');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/ola', [OlaController::class, 'index'])->name('ola.index');
+    Route::get('/sla', [SlaController::class, 'index'])->name('sla.index');
 
 });
