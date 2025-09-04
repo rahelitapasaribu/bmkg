@@ -64,6 +64,13 @@ class SlaController extends Controller
             $performances = collect($performances);
         }
 
+        if (!$request->has('tab') || !$request->has('year')) {
+            return redirect()->route('admin.sla.index', [
+                'tab' => $tab,
+                'year' => $year,
+            ]);
+        }
+
         return view('admin.sla', [
             'tab' => $tab,
             'year' => $year,
@@ -96,22 +103,34 @@ class SlaController extends Controller
             ->with('success', 'Data berhasil disimpan.');
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $perf = Performance::findOrFail($id);
-
-        $data = $request->validate([
-            'site_id' => 'required|exists:sites,id',
-            'year'    => 'required|integer',
-            'month'   => 'required|integer|min:1|max:12',
+        $request->validate([
+            'site_id' => 'required',
+            'year' => 'required',
+            'month' => 'required',
             'percentage' => 'required|numeric|min:0|max:100',
         ]);
 
-        $perf->update($data);
+        $performance = Performance::where('site_id', $request->site_id)
+            ->where('year', $request->year)
+            ->where('month', $request->month)
+            ->first();
 
-        return redirect()->route('admin.sla.index', ['tab' => $request->get('tab', 'AWOS'), 'year' => $data['year']])
-            ->with('success', 'Data berhasil diupdate.');
+        if (!$performance) {
+            return redirect()->back()->with('error', 'Data belum ada, silakan tambah data dulu.');
+        }
+
+        $performance->update([
+            'percentage' => $request->percentage,
+        ]);
+
+        return redirect()->route('admin.sla.index', [
+            'tab' => $request->tab,
+            'year' => $request->year
+        ])->with('success', 'Data berhasil diperbarui');
     }
+
 
     public function destroy($id)
     {
