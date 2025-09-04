@@ -10,117 +10,112 @@ use Illuminate\Support\Collection;
 
 class OlaController extends Controller
 {
-    // Mapping nama tab ke category_id (sesuaikan dengan DB-mu)
-    protected $categoryMap = [
-        'AWOS' => 3,
-        'RADAR' => 4,
-        'AWS' => 10,
-        'AWS Synoptic' => 5,
-        'AWS Maritim' => 6,
-        'AAWS' => 7,
-        'ARG' => 8,
-        'InaTEWS' => 9,
-    ];
-
     public function index(Request $request)
-    {
-        $tab  = $request->get('tab', 'AWOS');
-        $year = (int) $request->get('year', date('Y'));
+{
+    $tab  = $request->get('tab', 'AWOS');
+    $year = (int) $request->get('year', date('Y'));
 
-        // ambil category_id dari map
-        $categoryId = $this->categoryMap[$tab] ?? null;
+    // cari kategori berdasarkan nama
+    $category = \App\Models\Category::where('name', $tab)->first();
 
-        // ambil sites (dengan relasi satker) sesuai kategori; kalau tidak ada category -> empty collection
-        if ($categoryId) {
-            $sites = Site::where('category_id', $categoryId)
-                         ->with('satker')
-                         ->orderBy('name')
-                         ->get();
-        } else {
-            $sites = collect();
-        }
+    $sites = $category
+        ? Site::where('category_id', $category->id)
+              ->with('satker')
+              ->orderBy('name')
+              ->get()
+        : collect();
 
-        // ambil performances untuk sites di year ini
-        $siteIds = $sites->pluck('id')->toArray();
-        if (!empty($siteIds)) {
-            $performances = Performance::whereIn('site_id', $siteIds)
-                                ->where('year', $year)
-                                ->get();
-        } else {
-            $performances = collect();
-        }
+    $siteIds = $sites->pluck('id')->toArray();
 
-        // availableYears (ambil distinct years dari table performance), jika kosong buat default range
-        $years = Performance::select('year')->distinct()->orderBy('year', 'desc')->pluck('year')->toArray();
-        if (empty($years)) {
-            $current = (int) date('Y');
-            $years = range($current - 5, $current + 1);
-            rsort($years);
-        }
+    $performances = !empty($siteIds)
+        ? Performance::whereIn('site_id', $siteIds)
+                     ->where('year', $year)
+                     ->get()
+                     ->keyBy(function ($item) {
+                         return $item->site_id . '-' . $item->month;
+                     })
+        : collect();
 
-        // pastikan collections (blade mengandalkan ->where pada collections)
-        if (!($performances instanceof Collection)) {
-            $performances = collect($performances);
-        }
+    $years = Performance::select('year')
+                ->distinct()
+                ->orderBy('year', 'desc')
+                ->pluck('year')
+                ->toArray();
 
-        return view('admin.ola', [
-            'tab' => $tab,
-            'year' => $year,
-            'sites' => $sites,
-            'performances' => $performances,
-            'availableYears' => $years,
-        ]);
+    if (empty($years)) {
+        $current = (int) date('Y');
+        $years   = range($current - 5, $current + 1);
+        rsort($years);
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'site_id' => 'required|exists:sites,id',
-            'year'    => 'required|integer',
-            'month'   => 'required|integer|min:1|max:12',
-            'percentage' => 'required|numeric|min:0|max:100',
-        ]);
+    return view('admin.ola', [
+        'tab'            => $tab,
+        'year'           => $year,
+        'sites'          => $sites,
+        'performances'   => $performances,
+        'availableYears' => $years,
+        'months'         => [
+            1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',
+            7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
+        ],
+    ]);
+}
+    // OlaController.php
 
-        // hindari duplicate per (site,year,month) --> updateOrCreate
-        Performance::updateOrCreate(
-            [
-                'site_id' => $data['site_id'],
-                'year'    => $data['year'],
-                'month'   => $data['month'],
-            ],
-            ['percentage' => $data['percentage']]
-        );
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'site_id'    => 'required|exists:sites,id',
+        'year'       => 'required|integer',
+        'month'      => 'required|integer|min:1|max:12',
+        'percentage' => 'required|numeric|min:0|max:100',
+    ]);
 
-        return redirect()->route('admin.ola.index', ['tab' => $request->get('tab', 'AWOS'), 'year' => $data['year']])
-                         ->with('success', 'Data berhasil disimpan.');
-    }
+    // Insert kalau belum ada, update kalau sudah ada
+    \App\Models\Performance::updateOrCreate(
+        [
+            'site_id' => $validated['site_id'],
+            'year'    => $validated['year'],
+            'month'   => $validated['month'],
+        ],
+        [
+            'percentage' => $validated['percentage'],
+        ]
+    );
+
+    return redirect()->back()->with('success', 'Data berhasil disimpan!');
+}
 
     public function update(Request $request, $id)
     {
         $perf = Performance::findOrFail($id);
 
         $data = $request->validate([
-            'site_id' => 'required|exists:sites,id',
-            'year'    => 'required|integer',
-            'month'   => 'required|integer|min:1|max:12',
+            'site_id'    => 'required|exists:sites,id',
+            'year'       => 'required|integer',
+            'month'      => 'required|integer|min:1|max:12',
             'percentage' => 'required|numeric|min:0|max:100',
         ]);
 
         $perf->update($data);
 
-        return redirect()->route('admin.ola.index', ['tab' => $request->get('tab', 'AWOS'), 'year' => $data['year']])
-                         ->with('success', 'Data berhasil diupdate.');
+        return redirect()->route('admin.ola.index', [
+            'tab'  => $request->get('tab', 'AWOS'),
+            'year' => $data['year'],
+        ])->with('success', 'Data berhasil diupdate.');
     }
 
     public function destroy($id)
     {
         $perf = Performance::findOrFail($id);
-        $tab = request()->get('tab', 'AWOS');
+        $tab  = request()->get('tab', 'AWOS');
         $year = $perf->year;
 
         $perf->delete();
 
-        return redirect()->route('admin.ola.index', ['tab' => $tab, 'year' => $year])
-                         ->with('success', 'Data berhasil dihapus.');
+        return redirect()->route('admin.ola.index', [
+            'tab'  => $tab,
+            'year' => $year,
+        ])->with('success', 'Data berhasil dihapus.');
     }
 }
