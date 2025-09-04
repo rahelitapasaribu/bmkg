@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    public function showLoginForm()
+    {
+        return redirect('/');
+    }
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -16,7 +20,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('admin.home');
+            return redirect()->route('admin.dashboard');
         }
 
         return back()->withErrors([
