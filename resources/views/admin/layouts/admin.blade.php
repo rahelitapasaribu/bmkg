@@ -191,8 +191,6 @@
                         </h1>
                         <div class="flex items-center text-sm text-gray-500 mt-1">
                             <span>@yield('title', 'Dashboard')</span>
-                            <span class="mx-2">•</span>
-                            <span class="text-green-600 font-medium">Online</span>
                         </div>
                     </div>
                 </div>
