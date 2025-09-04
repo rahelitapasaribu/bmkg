@@ -24,19 +24,19 @@
             <ul class="space-y-1 px-3">
                 <li>
                     <a href="{{ route('admin.dashboard') }}"
-                        class="flex items-center px-4 py-2 rounded-md hover:bg-white/20 transition">
+                        class="flex items-center px-4 py-2 rounded-md transition {{ request()->routeIs('admin.dashboard') ? 'bg-white/30 text-white font-semibold border-l-4 border-white shadow-md' : 'hover:bg-white/20' }}">
                         <i class="fas fa-tachometer-alt mr-3 w-5"></i> Dashboard
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.ola.index') }}"
-                        class="flex items-center px-4 py-2 rounded-md hover:bg-white/20 transition">
+                        class="flex items-center px-4 py-2 rounded-md transition {{ request()->routeIs('admin.ola.*') ? 'bg-white/30 text-white font-semibold border-l-4 border-white shadow-md' : 'hover:bg-white/20' }}">
                         <i class="fas fa-cogs mr-3 w-5"></i> OLA
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.sla.index') }}"
-                        class="flex items-center px-4 py-2 rounded-md hover:bg-white/20 transition">
+                        class="flex items-center px-4 py-2 rounded-md transition {{ request()->routeIs('admin.sla.*') ? 'bg-white/30 text-white font-semibold border-l-4 border-white shadow-md' : 'hover:bg-white/20' }}">
                         <i class="fas fa-file-contract mr-3 w-5"></i> SLA
                     </a>
                 </li>

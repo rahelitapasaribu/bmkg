@@ -69,13 +69,13 @@
         <tbody>
             <tr>
                 <td class="px-4 py-2 border">ASN</td>
-                <td class="px-4 py-2 border"><span id="asnLaki">-</span></td>
-                <td class="px-4 py-2 border"><span id="asnPerempuan">-</span></td>
+                <td class="px-4 py-2 border text-center"><span id="asnLaki">-</span></td>
+                <td class="px-4 py-2 border text-center"><span id="asnPerempuan">-</span></td>
             </tr>
             <tr>
                 <td class="px-4 py-2 border">PPNPN</td>
-                <td class="px-4 py-2 border"><span id="ppnpnLaki">-</span></td>
-                <td class="px-4 py-2 border"><span id="ppnpnPerempuan">-</span></td>
+                <td class="px-4 py-2 border text-center"><span id="ppnpnLaki">-</span></td>
+                <td class="px-4 py-2 border text-center"><span id="ppnpnPerempuan">-</span></td>
             </tr>
         </tbody>
     </table>
@@ -378,7 +378,7 @@
             const rows = items.map(it => `
     <tr>
       <td class="px-3 py-2 border border-gray-200">${it.alat?.nama_alat ?? '-'}</td>
-      <td class="px-3 py-2 border border-gray-200 text-right">${it.jumlah ?? 0}</td>
+      <td class="px-3 py-2 border border-gray-200 text-center">${it.jumlah ?? 0}</td>
     </tr>
   `).join("");
             return `
@@ -386,8 +386,8 @@
       <table class="w-full text-sm border border-gray-200 rounded-md">
         <thead class="bg-gray-100">
           <tr>
-            <th class="px-3 py-2 text-left">Nama Alat</th>
-            <th class="px-3 py-2 text-right">Jumlah</th>
+            <th class="px-3 py-2 text-center">Nama Alat</th>
+            <th class="px-3 py-2 text-center">Jumlah</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
