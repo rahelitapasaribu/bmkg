@@ -52,7 +52,6 @@
                         <th class="border px-4 py-2 w-56 text-left">{{ $tab === 'RADAR' ? 'Lokasi' : 'Nama Site' }}</th>
                         <th class="border px-4 py-2 w-32">Merk</th>
                         <th class="border px-4 py-2 w-40">Stasiun PIC</th>
-                        <th class="border px-4 py-2 w-32">Tahun Pengadaan</th>
                         @foreach (['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'] as $bulan)
                             <th class="border px-2 py-2 w-12 text-center">{{ $bulan }}</th>
                         @endforeach
@@ -63,8 +62,7 @@
                         <tr>
                             <td class="border px-4 py-2 font-medium">{{ $site->name }}</td>
                             <td class="border px-2 py-2">{{ $site->merk }}</td>
-                            <td class="border px-2 py-2">{{ $site->satker->name ?? '' }}</td>
-                            <td class="border px-2 py-2">{{ $site->tahun_pengadaan ?? '' }}</td>
+                            <td class="border px-2 py-2">{{ $site->satker->nama_satker ?? '' }}</td>
 
                             @foreach (range(1, 12) as $m)
                                 @php
