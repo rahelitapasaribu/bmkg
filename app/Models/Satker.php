@@ -10,6 +10,7 @@ class Satker extends Model
     use HasFactory;
     protected $table = 'satker';
     protected $fillable = ['id_provinsi', 'nama_satker', 'latitude', 'longitude'];
+    public $timestamps = false;
 
     // Relasi ke Provinsi
     public function provinsi()

@@ -11,6 +11,7 @@ class Alat extends Model
 
     protected $table = 'alat'; // nama tabel
     protected $fillable = ['nama_alat'];
+    public $timestamps = false;
 
     // Relasi ke tabel alat_satker
     public function alatSatker()

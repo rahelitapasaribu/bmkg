@@ -29,14 +29,14 @@ class DataUptController extends Controller
                 'st.ppnpn_perempuan'
             )
             ->get()
-            ->map(function($item) {
+            ->map(function ($item) {
                 // Ambil data alat untuk setiap UPT
                 $item->alat_satker = DB::table('alat_satker as als')
                     ->join('alat as a', 'als.id_alat', '=', 'a.id')
                     ->where('als.id_satker', $item->id)
                     ->select('a.nama_alat', 'als.jumlah')
                     ->get();
-                
+
                 // Convert to object for easier access in blade
                 $item->provinsi = (object)['nama_provinsi' => $item->nama_provinsi];
                 $item->staf = (object)[
@@ -45,7 +45,7 @@ class DataUptController extends Controller
                     'ppnpn_laki' => $item->ppnpn_laki ?? 0,
                     'ppnpn_perempuan' => $item->ppnpn_perempuan ?? 0,
                 ];
-                
+
                 return $item;
             });
 
@@ -72,7 +72,7 @@ class DataUptController extends Controller
         ]);
 
         DB::beginTransaction();
-        
+
         try {
             // Insert data satker
             $satkerId = DB::table('satker')->insertGetId([
@@ -80,8 +80,6 @@ class DataUptController extends Controller
                 'id_provinsi' => $request->id_provinsi,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             // Insert data staf
@@ -91,15 +89,12 @@ class DataUptController extends Controller
                 'asn_perempuan' => $request->asn_perempuan ?? 0,
                 'ppnpn_laki' => $request->ppnpn_laki ?? 0,
                 'ppnpn_perempuan' => $request->ppnpn_perempuan ?? 0,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             DB::commit();
 
             return redirect()->route('admin.dataupt.index')
                 ->with('success', 'Data UPT berhasil ditambahkan!');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -167,7 +162,7 @@ class DataUptController extends Controller
         ]);
 
         DB::beginTransaction();
-        
+
         try {
             // Update data satker
             DB::table('satker')
@@ -176,13 +171,12 @@ class DataUptController extends Controller
                     'nama_satker' => $request->nama_satker,
                     'id_provinsi' => $request->id_provinsi,
                     'latitude' => $request->latitude,
-                    'longitude' => $request->longitude,
-                    'updated_at' => now(),
+                    'longitude' => $request->longitude
                 ]);
 
             // Update atau insert data staf
             $existingStaf = DB::table('staf')->where('id_satker', $id)->first();
-            
+
             if ($existingStaf) {
                 // Update existing staf
                 DB::table('staf')
@@ -192,7 +186,6 @@ class DataUptController extends Controller
                         'asn_perempuan' => $request->asn_perempuan ?? 0,
                         'ppnpn_laki' => $request->ppnpn_laki ?? 0,
                         'ppnpn_perempuan' => $request->ppnpn_perempuan ?? 0,
-                        'updated_at' => now(),
                     ]);
             } else {
                 // Insert new staf data
@@ -202,8 +195,6 @@ class DataUptController extends Controller
                     'asn_perempuan' => $request->asn_perempuan ?? 0,
                     'ppnpn_laki' => $request->ppnpn_laki ?? 0,
                     'ppnpn_perempuan' => $request->ppnpn_perempuan ?? 0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ]);
             }
 
@@ -211,7 +202,6 @@ class DataUptController extends Controller
 
             return redirect()->route('admin.dataupt.index')
                 ->with('success', 'Data UPT berhasil diperbarui!');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -227,41 +217,41 @@ class DataUptController extends Controller
     {
         $request->validate([
             'id_satker' => 'required|exists:satker,id',
-            'id_alat' => 'required|exists:alat,id',
             'jumlah' => 'required|integer|min:1',
         ]);
 
-        // Check if alat already exists for this satker
+        // Jika pilih alat baru
+        if ($request->id_alat === "new" && $request->filled('nama_alat_baru')) {
+            $alatId = DB::table('alat')->insertGetId([
+                'nama_alat' => $request->nama_alat_baru,
+            ]);
+        } else {
+            $alatId = $request->id_alat;
+        }
+
+        // Check apakah sudah ada
         $existing = DB::table('alat_satker')
             ->where('id_satker', $request->id_satker)
-            ->where('id_alat', $request->id_alat)
+            ->where('id_alat', $alatId)
             ->first();
 
         if ($existing) {
-            // Update existing record
             DB::table('alat_satker')
                 ->where('id_satker', $request->id_satker)
-                ->where('id_alat', $request->id_alat)
+                ->where('id_alat', $alatId)
                 ->update([
                     'jumlah' => DB::raw('jumlah + ' . $request->jumlah),
-                    'updated_at' => now(),
                 ]);
-
-            return redirect()->route('admin.dataupt.index')
-                ->with('success', 'Jumlah alat berhasil ditambahkan!');
         } else {
-            // Insert new record
             DB::table('alat_satker')->insert([
                 'id_satker' => $request->id_satker,
-                'id_alat' => $request->id_alat,
+                'id_alat' => $alatId,
                 'jumlah' => $request->jumlah,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
-
-            return redirect()->route('admin.dataupt.index')
-                ->with('success', 'Alat berhasil ditambahkan!');
         }
+
+        return redirect()->route('admin.dataupt.index')
+            ->with('success', 'Alat berhasil ditambahkan!');
     }
 
     /**

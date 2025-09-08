@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Staf extends Model
 {
     protected $table = 'staf'; // Nama tabel di database
+    public $timestamps = false;
 
     protected $fillable = [
         'id_satker',
@@ -22,7 +23,7 @@ class Staf extends Model
         return $this->belongsTo(Satker::class, 'id_satker', 'id');
     }
     public function staf()
-{
-    return $this->hasOne(Staf::class, 'id_satker');
-}
+    {
+        return $this->hasOne(Staf::class, 'id_satker');
+    }
 }

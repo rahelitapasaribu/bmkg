@@ -11,6 +11,7 @@ class AlatSatker extends Model
 
     protected $table = 'alat_satker'; // nama tabel
     protected $fillable = ['id_satker', 'id_alat', 'jumlah'];
+    public $timestamps = false;
 
     // Relasi ke tabel satker
     public function satker()
