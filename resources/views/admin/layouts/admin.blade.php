@@ -162,7 +162,20 @@
                         @endif
                     </a>
                 </li>
-
+                <li>
+                    <a href="{{ route('admin.dataupt.index') }}"
+                        class="group flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.dataupt.*') ? 'bg-white/20 text-white shadow-lg border-l-4 border-white' : 'hover:bg-white/10 hover:translate-x-1' }}">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.dataupt.*') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
+                            <i class="fas fa-file-contract text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-medium">Data Management</span>
+                        </div>
+                        @if(request()->routeIs('admin.dataupt.*'))
+                            <i class="fas fa-chevron-right text-sm"></i>
+                        @endif
+                    </a>
+                </li>
                 <!-- Divider -->
                 <li class="px-4 py-2">
                     <div class="border-t border-white/10"></div>

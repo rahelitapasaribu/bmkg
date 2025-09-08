@@ -35,4 +35,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     
     // SLA
     Route::resource('sla', App\Http\Controllers\Admin\SlaController::class);
+    // Data UPT
+    Route::resource('dataupt', App\Http\Controllers\Admin\DataUptController::class);
+
+    Route::post('dataupt/store-alat', [App\Http\Controllers\Admin\DataUptController::class, 'storeAlat'])
+        ->name('dataupt.store-alat');
 });
