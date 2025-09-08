@@ -4,18 +4,41 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Site;
-use App\Models\Category;
-use App\Models\Performance;
+use App\Models\Satker;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Load sites dengan relasi yang dibutuhkan
         $recapSites = Site::with(['category', 'satker', 'performances'])
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->groupBy('name')
+            ->map(function ($sites) {
+                $site = $sites->first();
 
-        return view('admin.home_admin', compact('recapSites'));
+                $slaPerformances = $sites
+                    ->filter(fn($s) => $s->category?->type === 'SLA')
+                    ->flatMap->performances;
+
+                $olaPerformances = $sites
+                    ->filter(fn($s) => $s->category?->type === 'OLA')
+                    ->flatMap->performances;
+
+                return (object)[
+                    'id' => $site->id,
+                    'name' => $site->name,
+                    'category' => $site->category,
+                    'satker' => $site->satker,
+                    'avg_sla' => $slaPerformances->avg('percentage'),
+                    'avg_ola' => $olaPerformances->avg('percentage'),
+                ];
+            })
+            ->sortBy(fn($site) => $site->category?->name) // urutkan berdasarkan type
+            ->values(); // reset index biar rapi
+
+        $recapSatkers = Satker::with('provinsi')->get();
+
+        return view('admin.home_admin', compact('recapSites', 'recapSatkers'));
     }
 }
