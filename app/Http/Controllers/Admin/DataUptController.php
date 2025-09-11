@@ -13,10 +13,10 @@ class DataUptController extends Controller
      */
     public function index()
     {
-        // Ambil data satker dengan relasi
+        // Ambil data satker dengan relasi provinsi & staf
         $uptData = DB::table('satker as s')
-            ->leftJoin('provinsi as p', 's.id_provinsi', '=', 'p.id')
-            ->leftJoin('staf as st', 's.id', '=', 'st.id_satker')
+            ->leftJoin('provinsi as p', 's.provinsi_id', '=', 'p.id')
+            ->leftJoin('staf as st', 's.id', '=', 'st.satker_id')
             ->select(
                 's.id',
                 's.nama_satker',
@@ -32,12 +32,13 @@ class DataUptController extends Controller
             ->map(function ($item) {
                 // Ambil data alat untuk setiap UPT
                 $item->alat_satker = DB::table('alat_satker as als')
-                    ->join('alat as a', 'als.id_alat', '=', 'a.id')
-                    ->where('als.id_satker', $item->id)
-                    ->select('a.nama_alat', 'als.jumlah')
+                    ->join('jenis_alat as ja', 'als.jenis_alat_id', '=', 'ja.id')
+                    ->join('kondisi_alat as ka', 'als.kondisi_id', '=', 'ka.id')
+                    ->where('als.satker_id', $item->id)
+                    ->select('ja.nama_jenis', 'ka.nama_kondisi', 'als.jumlah')
                     ->get();
 
-                // Convert to object for easier access in blade
+                // Convert ke object biar gampang dipakai di Blade
                 $item->provinsi = (object)['nama_provinsi' => $item->nama_provinsi];
                 $item->staf = (object)[
                     'asn_laki' => $item->asn_laki ?? 0,
@@ -50,9 +51,10 @@ class DataUptController extends Controller
             });
 
         $provinsi = DB::table('provinsi')->orderBy('nama_provinsi')->get();
-        $alat = DB::table('alat')->orderBy('nama_alat')->get();
+        $jenisAlat = DB::table('jenis_alat')->orderBy('nama_jenis')->get();
+        $kondisi = DB::table('kondisi_alat')->orderBy('nama_kondisi')->get();
 
-        return view('admin.dataupt', compact('uptData', 'provinsi', 'alat'));
+        return view('admin.dataupt', compact('uptData', 'provinsi', 'jenisAlat', 'kondisi'));
     }
 
     /**
@@ -62,7 +64,7 @@ class DataUptController extends Controller
     {
         $request->validate([
             'nama_satker' => 'required|string|max:255',
-            'id_provinsi' => 'required|exists:provinsi,id',
+            'provinsi_id' => 'required|exists:provinsi,id',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'asn_laki' => 'nullable|integer|min:0',
@@ -74,17 +76,15 @@ class DataUptController extends Controller
         DB::beginTransaction();
 
         try {
-            // Insert data satker
             $satkerId = DB::table('satker')->insertGetId([
                 'nama_satker' => $request->nama_satker,
-                'id_provinsi' => $request->id_provinsi,
+                'provinsi_id' => $request->provinsi_id,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
             ]);
 
-            // Insert data staf
             DB::table('staf')->insert([
-                'id_satker' => $satkerId,
+                'satker_id' => $satkerId,
                 'asn_laki' => $request->asn_laki ?? 0,
                 'asn_perempuan' => $request->asn_perempuan ?? 0,
                 'ppnpn_laki' => $request->ppnpn_laki ?? 0,
@@ -109,12 +109,12 @@ class DataUptController extends Controller
     public function edit($id)
     {
         $upt = DB::table('satker as s')
-            ->leftJoin('staf as st', 's.id', '=', 'st.id_satker')
+            ->leftJoin('staf as st', 's.id', '=', 'st.satker_id')
             ->where('s.id', $id)
             ->select(
                 's.id',
                 's.nama_satker',
-                's.id_provinsi',
+                's.provinsi_id',
                 's.latitude',
                 's.longitude',
                 'st.asn_laki',
@@ -128,10 +128,9 @@ class DataUptController extends Controller
             return response()->json(['error' => 'Data tidak ditemukan'], 404);
         }
 
-        // Format data untuk response JSON
-        $response = [
+        return response()->json([
             'nama_satker' => $upt->nama_satker,
-            'id_provinsi' => $upt->id_provinsi,
+            'provinsi_id' => $upt->provinsi_id,
             'latitude' => $upt->latitude,
             'longitude' => $upt->longitude,
             'staf' => [
@@ -140,9 +139,7 @@ class DataUptController extends Controller
                 'ppnpn_laki' => $upt->ppnpn_laki ?? 0,
                 'ppnpn_perempuan' => $upt->ppnpn_perempuan ?? 0,
             ]
-        ];
-
-        return response()->json($response);
+        ]);
     }
 
     /**
@@ -152,7 +149,7 @@ class DataUptController extends Controller
     {
         $request->validate([
             'nama_satker' => 'required|string|max:255',
-            'id_provinsi' => 'required|exists:provinsi,id',
+            'provinsi_id' => 'required|exists:provinsi,id',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'asn_laki' => 'nullable|integer|min:0',
@@ -164,23 +161,20 @@ class DataUptController extends Controller
         DB::beginTransaction();
 
         try {
-            // Update data satker
             DB::table('satker')
                 ->where('id', $id)
                 ->update([
                     'nama_satker' => $request->nama_satker,
-                    'id_provinsi' => $request->id_provinsi,
+                    'provinsi_id' => $request->provinsi_id,
                     'latitude' => $request->latitude,
                     'longitude' => $request->longitude
                 ]);
 
-            // Update atau insert data staf
-            $existingStaf = DB::table('staf')->where('id_satker', $id)->first();
+            $existingStaf = DB::table('staf')->where('satker_id', $id)->first();
 
             if ($existingStaf) {
-                // Update existing staf
                 DB::table('staf')
-                    ->where('id_satker', $id)
+                    ->where('satker_id', $id)
                     ->update([
                         'asn_laki' => $request->asn_laki ?? 0,
                         'asn_perempuan' => $request->asn_perempuan ?? 0,
@@ -188,9 +182,8 @@ class DataUptController extends Controller
                         'ppnpn_perempuan' => $request->ppnpn_perempuan ?? 0,
                     ]);
             } else {
-                // Insert new staf data
                 DB::table('staf')->insert([
-                    'id_satker' => $id,
+                    'satker_id' => $id,
                     'asn_laki' => $request->asn_laki ?? 0,
                     'asn_perempuan' => $request->asn_perempuan ?? 0,
                     'ppnpn_laki' => $request->ppnpn_laki ?? 0,
@@ -216,36 +209,29 @@ class DataUptController extends Controller
     public function storeAlat(Request $request)
     {
         $request->validate([
-            'id_satker' => 'required|exists:satker,id',
+            'satker_id' => 'required|exists:satker,id',
+            'jenis_alat_id' => 'required|exists:jenis_alat,id',
+            'kondisi_id' => 'required|exists:kondisi_alat,id',
             'jumlah' => 'required|integer|min:1',
         ]);
 
-        // Jika pilih alat baru
-        if ($request->id_alat === "new" && $request->filled('nama_alat_baru')) {
-            $alatId = DB::table('alat')->insertGetId([
-                'nama_alat' => $request->nama_alat_baru,
-            ]);
-        } else {
-            $alatId = $request->id_alat;
-        }
-
-        // Check apakah sudah ada
         $existing = DB::table('alat_satker')
-            ->where('id_satker', $request->id_satker)
-            ->where('id_alat', $alatId)
+            ->where('satker_id', $request->satker_id)
+            ->where('jenis_alat_id', $request->jenis_alat_id)
+            ->where('kondisi_id', $request->kondisi_id)
             ->first();
 
         if ($existing) {
             DB::table('alat_satker')
-                ->where('id_satker', $request->id_satker)
-                ->where('id_alat', $alatId)
+                ->where('id', $existing->id)
                 ->update([
                     'jumlah' => DB::raw('jumlah + ' . $request->jumlah),
                 ]);
         } else {
             DB::table('alat_satker')->insert([
-                'id_satker' => $request->id_satker,
-                'id_alat' => $alatId,
+                'satker_id' => $request->satker_id,
+                'jenis_alat_id' => $request->jenis_alat_id,
+                'kondisi_id' => $request->kondisi_id,
                 'jumlah' => $request->jumlah,
             ]);
         }
@@ -254,19 +240,5 @@ class DataUptController extends Controller
             ->with('success', 'Alat berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        // Method ini bisa diimplementasi nanti jika diperlukan
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        // Method ini bisa diimplementasi nanti jika diperlukan
-    }
+    // show & destroy masih kosong, bisa ditambah kalau diperlukan
 }

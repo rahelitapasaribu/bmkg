@@ -9,7 +9,7 @@ class UPTController extends Controller
     public function index()
     {
         $upts = DB::table('satker')
-            ->join('provinsi', 'satker.id_provinsi', '=', 'provinsi.id')
+            ->join('provinsi', 'satker.provinsi_id', '=', 'provinsi.id')
             ->select(
                 'satker.id',
                 'satker.nama_satker',

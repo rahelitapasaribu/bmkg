@@ -4,64 +4,36 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Site;
-use App\Models\Performance;
-use Illuminate\Support\Collection;
+use App\Models\SlaOlaNilai;
+use App\Models\TipeKategori;
 
 class SlaController extends Controller
 {
-    // Mapping nama tab ke category_id (sesuaikan dengan DB-mu)
-    protected $categoryMap = [
-        'AWOS' => 16,
-        'RADAR' => 18,
-        'AWS' => 17,
-        'AWS Synoptic' => 19,
-        'AWS Maritim' => 20,
-        'AAWS' => 21,
-        'ARG' => 22,
-        'InaTEWS' => 23,
-    ];
-
-
     public function index(Request $request)
     {
-        $tab  = $request->get('tab', 'AWOS');
+        $tab = $request->get('tab', 'SLA');
         $year = (int) $request->get('year', date('Y'));
 
-        // ambil category_id dari map
-        $categoryId = $this->categoryMap[$tab] ?? null;
+        // ambil kategori dengan nama SLA
+        $kategori = TipeKategori::where('nama_kategori', 'SLA')->first();
 
-        // ambil sites (dengan relasi satker) sesuai kategori; kalau tidak ada category -> empty collection
-        if ($categoryId) {
-            $sites = Site::where('category_id', $categoryId)
-                ->with('satker')
-                ->orderBy('name')
-                ->get();
-        } else {
-            $sites = collect();
-        }
+        $nilai = $kategori
+            ? SlaOlaNilai::where('kategori_id', $kategori->id)
+                ->whereYear('created_at', $year)
+                ->get()
+            : collect();
 
-        // ambil performances untuk sites di year ini
-        $siteIds = $sites->pluck('id')->toArray();
-        if (!empty($siteIds)) {
-            $performances = Performance::whereIn('site_id', $siteIds)
-                ->where('year', $year)
-                ->get();
-        } else {
-            $performances = collect();
-        }
+        // ambil daftar tahun
+        $years = SlaOlaNilai::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->toArray();
 
-        // availableYears (ambil distinct years dari table performance), jika kosong buat default range
-        $years = Performance::select('year')->distinct()->orderBy('year', 'desc')->pluck('year')->toArray();
         if (empty($years)) {
             $current = (int) date('Y');
             $years = range($current - 5, $current + 1);
             rsort($years);
-        }
-
-        // pastikan collections (blade mengandalkan ->where pada collections)
-        if (!($performances instanceof Collection)) {
-            $performances = collect($performances);
         }
 
         if (!$request->has('tab') || !$request->has('year')) {
@@ -74,8 +46,7 @@ class SlaController extends Controller
         return view('admin.sla', [
             'tab' => $tab,
             'year' => $year,
-            'sites' => $sites,
-            'performances' => $performances,
+            'nilai' => $nilai,
             'availableYears' => $years,
         ]);
     }
@@ -83,64 +54,38 @@ class SlaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'site_id' => 'required|exists:sites,id',
-            'year'    => 'required|integer',
-            'month'   => 'required|integer|min:1|max:12',
-            'percentage' => 'required|numeric|min:0|max:100',
+            'kategori_id' => 'required|exists:tipe_kategori,id',
+            'nama' => 'required|string|max:255',
+            'nilai' => 'required|numeric|min:0|max:100',
+            'keterangan' => 'nullable|string',
         ]);
 
-        // hindari duplicate per (site,year,month) --> updateOrCreate
-        Performance::updateOrCreate(
-            [
-                'site_id' => $data['site_id'],
-                'year'    => $data['year'],
-                'month'   => $data['month'],
-            ],
-            ['percentage' => $data['percentage']]
-        );
-
-        return redirect()->route('admin.sla.index', ['tab' => $request->get('tab', 'AWOS'), 'year' => $data['year']])
-            ->with('success', 'Data berhasil disimpan.');
-    }
-
-    public function update(Request $request)
-    {
-        $request->validate([
-            'site_id' => 'required',
-            'year' => 'required',
-            'month' => 'required',
-            'percentage' => 'required|numeric|min:0|max:100',
-        ]);
-
-        $performance = Performance::where('site_id', $request->site_id)
-            ->where('year', $request->year)
-            ->where('month', $request->month)
-            ->first();
-
-        if (!$performance) {
-            return redirect()->back()->with('error', 'Data belum ada, silakan tambah data dulu.');
-        }
-
-        $performance->update([
-            'percentage' => $request->percentage,
-        ]);
+        SlaOlaNilai::create($data);
 
         return redirect()->route('admin.sla.index', [
-            'tab' => $request->tab,
-            'year' => $request->year
-        ])->with('success', 'Data berhasil diperbarui');
+            'tab' => 'SLA',
+            'year' => date('Y'),
+        ])->with('success', 'Data SLA berhasil ditambahkan.');
     }
 
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'nilai' => 'required|numeric|min:0|max:100',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        $nilai = SlaOlaNilai::findOrFail($id);
+        $nilai->update($data);
+
+        return redirect()->back()->with('success', 'Data SLA berhasil diperbarui.');
+    }
 
     public function destroy($id)
     {
-        $perf = Performance::findOrFail($id);
-        $tab = request()->get('tab', 'AWOS');
-        $year = $perf->year;
+        $nilai = SlaOlaNilai::findOrFail($id);
+        $nilai->delete();
 
-        $perf->delete();
-
-        return redirect()->route('admin.sla.index', ['tab' => $tab, 'year' => $year])
-            ->with('success', 'Data berhasil dihapus.');
+        return redirect()->back()->with('success', 'Data SLA berhasil dihapus.');
     }
 }

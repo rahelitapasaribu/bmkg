@@ -5,40 +5,41 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Site;
 use App\Models\Satker;
+use App\Models\SlaOlaNilai;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $recapSites = Site::with(['category', 'satker', 'performances'])
+        // Recap semua site dengan relasi Satker dan Jenis Alat
+        $recapSites = Site::with(['satker.provinsi', 'jenisAlat'])
             ->orderBy('name')
             ->get()
-            ->groupBy('name')
-            ->map(function ($sites) {
-                $site = $sites->first();
-
-                $slaPerformances = $sites
-                    ->filter(fn($s) => $s->category?->type === 'SLA')
-                    ->flatMap->performances;
-
-                $olaPerformances = $sites
-                    ->filter(fn($s) => $s->category?->type === 'OLA')
-                    ->flatMap->performances;
-
-                return (object)[
-                    'id' => $site->id,
-                    'name' => $site->name,
-                    'category' => $site->category,
-                    'satker' => $site->satker,
-                    'avg_sla' => $slaPerformances->avg('percentage'),
-                    'avg_ola' => $olaPerformances->avg('percentage'),
+            ->map(function ($site) {
+                return (object) [
+                    'id'         => $site->id,
+                    'name'       => $site->name,
+                    'merk'       => $site->merk,
+                    'jenis_alat' => $site->jenisAlat?->nama_jenis,
+                    'satker'     => $site->satker?->nama_satker,
+                    'provinsi'   => $site->satker?->provinsi?->nama_provinsi,
                 ];
-            })
-            ->sortBy(fn($site) => $site->category?->name) // urutkan berdasarkan type
-            ->values(); // reset index biar rapi
+            });
 
+        // Recap semua satker dengan provinsinya
         $recapSatkers = Satker::with('provinsi')->get();
 
-        return view('admin.home_admin', compact('recapSites', 'recapSatkers'));
+        // Recap nilai SLA & OLA (dari tabel sla_ola_nilai)
+        $recapSlaOla = SlaOlaNilai::with('kategori')
+            ->get()
+            ->groupBy(fn($item) => $item->kategori?->nama_kategori)
+            ->map(function ($items, $kategori) {
+                return [
+                    'kategori' => $kategori,
+                    'rata2_nilai' => $items->avg('nilai'),
+                ];
+            });
+
+        return view('admin.home_admin', compact('recapSites', 'recapSatkers', 'recapSlaOla'));
     }
 }
