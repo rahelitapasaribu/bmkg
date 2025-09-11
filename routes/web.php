@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OlaController;
 use App\Http\Controllers\Admin\SlaController;
+use App\Http\Controllers\Admin\DataUptController;
 
 // ==========================
 // Public Routes

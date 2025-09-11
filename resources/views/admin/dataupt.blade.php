@@ -14,14 +14,6 @@
     <div class="p-2">
         <h1 class="text-2xl font-bold mb-4">Data UPT</h1>
 
-        {{-- Tombol Tambah Data --}}
-        <div class="flex justify-between items-center mb-4">
-            <button onclick="openModal('createModal')"
-                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                + Tambah Data UPT
-            </button>
-        </div>
-
         {{-- Tabel Data --}}
         <div class="overflow-x-auto">
             <table class="min-w-full border border-gray-200 text-sm">
@@ -51,8 +43,8 @@
                                 {{ $upt->staf->ppnpn_laki ?? 0 }} / {{ $upt->staf->ppnpn_perempuan ?? 0 }}
                             </td>
                             <td class="border px-2 py-2">
-                                @if($upt->alat_satker && count($upt->alat_satker) > 0)
-                                    @foreach($upt->alat_satker as $alatSatker)
+                                @if ($upt->alat_satker && count($upt->alat_satker) > 0)
+                                    @foreach ($upt->alat_satker as $alatSatker)
                                         <div class="text-xs mb-1">
                                             {{ $alatSatker->nama_alat ?? '' }} ({{ $alatSatker->jumlah }})
                                         </div>
@@ -62,12 +54,12 @@
                                 @endif
                             </td>
                             <td class="border px-2 py-2 text-center">
-                                <button onclick="openEditModal({{ $upt->id }})" 
+                                <button onclick="openEditModal({{ $upt->id }})"
                                     class="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600 mb-1">
                                     Edit
                                 </button>
                                 <br>
-                                <button onclick="openAlatModal({{ $upt->id }})" 
+                                <button onclick="openAlatModal({{ $upt->id }})"
                                     class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
                                     + Alat
                                 </button>
@@ -89,7 +81,7 @@
             <h2 class="text-xl font-bold mb-4">Tambah Data UPT</h2>
             <form action="{{ route('admin.dataupt.store') }}" method="POST">
                 @csrf
-                
+
                 {{-- Data UPT --}}
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
@@ -100,7 +92,7 @@
                         <label class="block text-sm font-medium mb-1">Provinsi</label>
                         <select name="id_provinsi" required class="w-full border rounded p-2" id="provinsi_select">
                             <option value="">Pilih Provinsi</option>
-                            @foreach($provinsi as $prov)
+                            @foreach ($provinsi as $prov)
                                 <option value="{{ $prov->id }}">{{ $prov->nama_provinsi }}</option>
                             @endforeach
                         </select>
@@ -121,19 +113,23 @@
                     <div class="grid grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">ASN Laki-laki</label>
-                            <input type="number" name="asn_laki" min="0" value="0" class="w-full border rounded p-2">
+                            <input type="number" name="asn_laki" min="0" value="0"
+                                class="w-full border rounded p-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">ASN Perempuan</label>
-                            <input type="number" name="asn_perempuan" min="0" value="0" class="w-full border rounded p-2">
+                            <input type="number" name="asn_perempuan" min="0" value="0"
+                                class="w-full border rounded p-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">PPNPN Laki-laki</label>
-                            <input type="number" name="ppnpn_laki" min="0" value="0" class="w-full border rounded p-2">
+                            <input type="number" name="ppnpn_laki" min="0" value="0"
+                                class="w-full border rounded p-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">PPNPN Perempuan</label>
-                            <input type="number" name="ppnpn_perempuan" min="0" value="0" class="w-full border rounded p-2">
+                            <input type="number" name="ppnpn_perempuan" min="0" value="0"
+                                class="w-full border rounded p-2">
                         </div>
                     </div>
                 </div>
@@ -154,29 +150,32 @@
             <form id="editForm" method="POST">
                 @csrf
                 @method('PUT')
-                
+
                 {{-- Data UPT --}}
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Nama UPT</label>
-                        <input type="text" name="nama_satker" id="edit_nama_satker" required class="w-full border rounded p-2">
+                        <input type="text" name="nama_satker" id="edit_nama_satker" required
+                            class="w-full border rounded p-2">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Provinsi</label>
                         <select name="id_provinsi" id="edit_id_provinsi" required class="w-full border rounded p-2">
                             <option value="">Pilih Provinsi</option>
-                            @foreach($provinsi as $prov)
+                            @foreach ($provinsi as $prov)
                                 <option value="{{ $prov->id }}">{{ $prov->nama_provinsi }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Latitude</label>
-                        <input type="number" step="any" name="latitude" id="edit_latitude" required class="w-full border rounded p-2">
+                        <input type="number" step="any" name="latitude" id="edit_latitude" required
+                            class="w-full border rounded p-2">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Longitude</label>
-                        <input type="number" step="any" name="longitude" id="edit_longitude" required class="w-full border rounded p-2">
+                        <input type="number" step="any" name="longitude" id="edit_longitude" required
+                            class="w-full border rounded p-2">
                     </div>
                 </div>
 
@@ -186,19 +185,23 @@
                     <div class="grid grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">ASN Laki-laki</label>
-                            <input type="number" name="asn_laki" id="edit_asn_laki" min="0" class="w-full border rounded p-2">
+                            <input type="number" name="asn_laki" id="edit_asn_laki" min="0"
+                                class="w-full border rounded p-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">ASN Perempuan</label>
-                            <input type="number" name="asn_perempuan" id="edit_asn_perempuan" min="0" class="w-full border rounded p-2">
+                            <input type="number" name="asn_perempuan" id="edit_asn_perempuan" min="0"
+                                class="w-full border rounded p-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">PPNPN Laki-laki</label>
-                            <input type="number" name="ppnpn_laki" id="edit_ppnpn_laki" min="0" class="w-full border rounded p-2">
+                            <input type="number" name="ppnpn_laki" id="edit_ppnpn_laki" min="0"
+                                class="w-full border rounded p-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">PPNPN Perempuan</label>
-                            <input type="number" name="ppnpn_perempuan" id="edit_ppnpn_perempuan" min="0" class="w-full border rounded p-2">
+                            <input type="number" name="ppnpn_perempuan" id="edit_ppnpn_perempuan" min="0"
+                                class="w-full border rounded p-2">
                         </div>
                     </div>
                 </div>
@@ -219,20 +222,27 @@
             <form id="alatForm" method="POST" action="{{ route('admin.dataupt.store-alat') }}">
                 @csrf
                 <input type="hidden" name="id_satker" id="alat_id_satker">
-                
+
                 <div class="mb-3">
                     <label class="block text-sm font-medium mb-1">Nama Alat</label>
-                    <select name="id_alat" id="select_alat" required class="w-full border rounded p-2">
+                    <select name="id_alat" id="select_alat" required class="w-full border rounded p-2"
+                        onchange="toggleNewAlat(this)">
                         <option value="">Pilih Alat</option>
-                        @foreach($alat as $a)
+                        @foreach ($alat as $a)
                             <option value="{{ $a->id }}">{{ $a->nama_alat }}</option>
                         @endforeach
+                        <option value="new">+ Tambah Alat Baru</option>
                     </select>
+
+                    <input type="text" name="nama_alat_baru" id="nama_alat_baru"
+                        class="w-full border rounded p-2 mt-2 hidden" placeholder="Masukkan nama alat baru">
                 </div>
-                
+
+
                 <div class="mb-3">
                     <label class="block text-sm font-medium mb-1">Jumlah</label>
-                    <input type="number" name="jumlah" min="1" value="1" required class="w-full border rounded p-2">
+                    <input type="number" name="jumlah" min="1" value="1" required
+                        class="w-full border rounded p-2">
                 </div>
 
                 <div class="flex justify-end space-x-2">
@@ -248,10 +258,12 @@
     <script>
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
         }
 
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
         }
 
         function openEditModal(id) {
@@ -263,14 +275,14 @@
                     document.getElementById('edit_id_provinsi').value = data.id_provinsi || '';
                     document.getElementById('edit_latitude').value = data.latitude || '';
                     document.getElementById('edit_longitude').value = data.longitude || '';
-                    
+
                     // Data staf
                     document.getElementById('edit_asn_laki').value = data.staf?.asn_laki || 0;
                     document.getElementById('edit_asn_perempuan').value = data.staf?.asn_perempuan || 0;
                     document.getElementById('edit_ppnpn_laki').value = data.staf?.ppnpn_laki || 0;
                     document.getElementById('edit_ppnpn_perempuan').value = data.staf?.ppnpn_perempuan || 0;
 
-                    document.getElementById('editForm').action = `/admin/dataupt/${id}`;
+                    document.getElementById('editForm').action = `{{ url('admin/dataupt') }}/${id}`;
                     document.getElementById('editModal').classList.remove('hidden');
                 })
                 .catch(error => {
@@ -287,10 +299,20 @@
         $(document).ready(function() {
             $('#provinsi_select, #edit_id_provinsi, #select_alat').select2({
                 width: '100%',
-                placeholder: function(){
+                placeholder: function() {
                     return $(this).attr('placeholder') || "Pilih...";
                 }
             });
         });
+
+        function toggleNewAlat(select) {
+            if (select.value === "new") {
+                document.getElementById("nama_alat_baru").classList.remove("hidden");
+                document.getElementById("nama_alat_baru").setAttribute("required", "true");
+            } else {
+                document.getElementById("nama_alat_baru").classList.add("hidden");
+                document.getElementById("nama_alat_baru").removeAttribute("required");
+            }
+        }
     </script>
 @endsection
