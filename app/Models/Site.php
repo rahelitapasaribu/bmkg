@@ -8,25 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 class Site extends Model
 {
     use HasFactory;
+
+    protected $table = 'sites';
+    protected $primaryKey = 'id';
+    public $timestamps = true;
+
     protected $fillable = [
-    'category_id', 
-    'merk', 
-    'id_satker', 
-    'name'];
+        'jenis_alat_id',
+        'satker_id',
+        'merk',
+        'name',
+    ];
 
-    public function category()
+    public function jenisAlat()
     {
-        return $this->belongsTo(Category::class, 'category_id');
-    }
-
-    public function performances()
-    {
-        return $this->hasMany(Performance::class, 'site_id');
+        return $this->belongsTo(JenisAlat::class, 'jenis_alat_id', 'id');
     }
 
     public function satker()
     {
-        return $this->belongsTo(Satker::class, 'id_satker');
+        return $this->belongsTo(Satker::class, 'satker_id', 'id');
     }
-
 }

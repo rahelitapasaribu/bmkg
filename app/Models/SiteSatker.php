@@ -5,22 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Staf extends Model
+class SiteSatker extends Model
 {
     use HasFactory;
 
-    protected $table = 'staf';
+    protected $table = 'site_satker';
     protected $primaryKey = 'id';
     public $timestamps = false;
 
     protected $fillable = [
+        'site_id',
         'satker_id',
-        'asn_laki',
-        'asn_perempuan',
-        'ppnpn_laki',
-        'ppnpn_perempuan'
     ];
 
+    // Relasi ke Site
+    public function site()
+    {
+        return $this->belongsTo(Site::class, 'site_id', 'id');
+    }
+
+    // Relasi ke Satker
     public function satker()
     {
         return $this->belongsTo(Satker::class, 'satker_id', 'id');
