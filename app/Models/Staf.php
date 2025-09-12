@@ -14,7 +14,7 @@ class Staf extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_satker',
+        'satker_id',
         'asn_laki',
         'asn_perempuan',
         'ppnpn_laki',
@@ -23,6 +23,6 @@ class Staf extends Model
 
     public function satker()
     {
-        return $this->belongsTo(Satker::class, 'id_satker', 'id');
+        return $this->belongsTo(Satker::class, 'satker_id', 'id');
     }
 }

@@ -46,7 +46,7 @@
                                 @if ($upt->alat_satker && count($upt->alat_satker) > 0)
                                     @foreach ($upt->alat_satker as $alatSatker)
                                         <div class="text-xs mb-1">
-                                            {{ $alatSatker->nama_alat ?? '' }} ({{ $alatSatker->jumlah }})
+                                            {{ $alatSatker->nama_jenis ?? '' }} - {{ $alatSatker->nama_kondisi ?? '' }} ({{ $alatSatker->jumlah }})
                                         </div>
                                     @endforeach
                                 @else
@@ -90,7 +90,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Provinsi</label>
-                        <select name="id_provinsi" required class="w-full border rounded p-2" id="provinsi_select">
+                        <select name="id_provinsi" required class="w-full border rounded p-2 text-center" id="provinsi_select">
                             <option value="">Pilih Provinsi</option>
                             @foreach ($provinsi as $prov)
                                 <option value="{{ $prov->id }}">{{ $prov->nama_provinsi }}</option>
@@ -160,7 +160,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Provinsi</label>
-                        <select name="id_provinsi" id="edit_id_provinsi" required class="w-full border rounded p-2">
+                        <select name="id_provinsi" id="edit_id_provinsi" required class="w-full border rounded p-2 text-center">
                             <option value="">Pilih Provinsi</option>
                             @foreach ($provinsi as $prov)
                                 <option value="{{ $prov->id }}">{{ $prov->nama_provinsi }}</option>
@@ -221,15 +221,15 @@
             <h2 class="text-xl font-bold mb-4">Tambah Alat</h2>
             <form id="alatForm" method="POST" action="{{ route('admin.dataupt.store-alat') }}">
                 @csrf
-                <input type="hidden" name="id_satker" id="alat_id_satker">
+                <input type="hidden" name="satker_id" id="alat_id_satker">
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium mb-1">Nama Alat</label>
                     <select name="id_alat" id="select_alat" required class="w-full border rounded p-2"
                         onchange="toggleNewAlat(this)">
                         <option value="">Pilih Alat</option>
-                        @foreach ($alat as $a)
-                            <option value="{{ $a->id }}">{{ $a->nama_alat }}</option>
+                        @foreach ($jenisAlat as $a)
+                            <option value="{{ $a->id }}">{{ $a->nama_jenis }}</option>
                         @endforeach
                         <option value="new">+ Tambah Alat Baru</option>
                     </select>

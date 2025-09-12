@@ -13,7 +13,12 @@ class AlatSatker extends Model
     protected $primaryKey = 'id';
     public $timestamps = true;
 
-    protected $fillable = ['satker_id', 'jenis_alat_id', 'kondisi_id', 'jumlah'];
+    protected $fillable = [
+        'satker_id',
+        'jenis_alat_id',
+        'kondisi_id',
+        'jumlah'
+    ];
 
     public function satker()
     {

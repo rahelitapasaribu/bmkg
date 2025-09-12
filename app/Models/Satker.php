@@ -27,7 +27,7 @@ class Satker extends Model
 
     public function staf()
     {
-        return $this->hasOne(Staf::class, 'id_satker', 'id');
+        return $this->hasMany(Staf::class, 'satker_id', 'id');
     }
 
     public function siteSatkers()

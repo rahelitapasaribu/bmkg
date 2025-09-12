@@ -15,7 +15,7 @@ class DataUptController extends Controller
     {
         // Ambil data satker dengan relasi provinsi & staf
         $uptData = DB::table('satker as s')
-            ->leftJoin('provinsi as p', 's.provinsi_id', '=', 'p.id')
+            ->leftJoin('provinsi as p', 's.id_provinsi', '=', 'p.id')
             ->leftJoin('staf as st', 's.id', '=', 'st.satker_id')
             ->select(
                 's.id',
@@ -64,7 +64,7 @@ class DataUptController extends Controller
     {
         $request->validate([
             'nama_satker' => 'required|string|max:255',
-            'provinsi_id' => 'required|exists:provinsi,id',
+            'id_provinsi' => 'required|exists:provinsi,id',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'asn_laki' => 'nullable|integer|min:0',
@@ -78,7 +78,7 @@ class DataUptController extends Controller
         try {
             $satkerId = DB::table('satker')->insertGetId([
                 'nama_satker' => $request->nama_satker,
-                'provinsi_id' => $request->provinsi_id,
+                'id_provinsi' => $request->id_provinsi,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
             ]);
@@ -114,7 +114,7 @@ class DataUptController extends Controller
             ->select(
                 's.id',
                 's.nama_satker',
-                's.provinsi_id',
+                's.id_provinsi',
                 's.latitude',
                 's.longitude',
                 'st.asn_laki',
@@ -125,21 +125,12 @@ class DataUptController extends Controller
             ->first();
 
         if (!$upt) {
-            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+            return redirect()->route('admin.dataupt.index')->with('error', 'Data tidak ditemukan!');
         }
 
-        return response()->json([
-            'nama_satker' => $upt->nama_satker,
-            'provinsi_id' => $upt->provinsi_id,
-            'latitude' => $upt->latitude,
-            'longitude' => $upt->longitude,
-            'staf' => [
-                'asn_laki' => $upt->asn_laki ?? 0,
-                'asn_perempuan' => $upt->asn_perempuan ?? 0,
-                'ppnpn_laki' => $upt->ppnpn_laki ?? 0,
-                'ppnpn_perempuan' => $upt->ppnpn_perempuan ?? 0,
-            ]
-        ]);
+        $provinsi = DB::table('provinsi')->orderBy('nama_provinsi')->get();
+
+        return view('admin.dataupt-edit', compact('upt', 'provinsi'));  
     }
 
     /**
@@ -149,7 +140,7 @@ class DataUptController extends Controller
     {
         $request->validate([
             'nama_satker' => 'required|string|max:255',
-            'provinsi_id' => 'required|exists:provinsi,id',
+            'id_provinsi' => 'required|exists:provinsi,id',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'asn_laki' => 'nullable|integer|min:0',
@@ -165,7 +156,7 @@ class DataUptController extends Controller
                 ->where('id', $id)
                 ->update([
                     'nama_satker' => $request->nama_satker,
-                    'provinsi_id' => $request->provinsi_id,
+                    'id_provinsi' => $request->id_provinsi,
                     'latitude' => $request->latitude,
                     'longitude' => $request->longitude
                 ]);
