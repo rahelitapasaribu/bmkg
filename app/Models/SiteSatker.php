@@ -11,22 +11,26 @@ class SiteSatker extends Model
 
     protected $table = 'site_satker';
     protected $primaryKey = 'id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'site_id',
         'satker_id',
+        'kondisi_id',
     ];
 
-    // Relasi ke Site
     public function site()
     {
         return $this->belongsTo(Site::class, 'site_id', 'id');
     }
 
-    // Relasi ke Satker
     public function satker()
     {
         return $this->belongsTo(Satker::class, 'satker_id', 'id');
+    }
+
+    public function kondisi()
+    {
+        return $this->belongsTo(KondisiAlat::class, 'kondisi_id', 'id');
     }
 }

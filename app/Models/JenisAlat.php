@@ -22,6 +22,11 @@ class JenisAlat extends Model
 
     public function sites()
     {
-        return $this->hasMany(Site::class, 'jenis_alat_id', 'id');
+        return $this->hasMany(Site::class, 'id_jenis_alat', 'id');
+    }
+
+    public function slaOlaNilai()
+    {
+        return $this->hasMany(SlaOlaNilai::class, 'jenis_alat_id', 'id');
     }
 }

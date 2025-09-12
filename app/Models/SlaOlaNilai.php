@@ -14,15 +14,26 @@ class SlaOlaNilai extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'kategori_id',
-        'nama',
-        'nilai',
-        'keterangan',
+        'site_id',
+        'jenis_alat_id',
+        'tipe_id',
+        'tahun',
+        'bulan',
+        'persentase',
     ];
 
-    // Relasi ke TipeKategori
     public function kategori()
     {
-        return $this->belongsTo(TipeKategori::class, 'kategori_id', 'id');
+        return $this->belongsTo(TipeKategori::class, 'tipe_id', 'id');
+    }
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class, 'site_id', 'id');
+    }
+
+    public function jenisAlat()
+    {
+        return $this->belongsTo(JenisAlat::class, 'jenis_alat_id', 'id');
     }
 }

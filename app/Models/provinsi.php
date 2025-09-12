@@ -17,6 +17,6 @@ class Provinsi extends Model
 
     public function satkers()
     {
-        return $this->hasMany(Satker::class, 'provinsi_id', 'id');
+        return $this->hasMany(Satker::class, 'id_provinsi', 'id');
     }
 }

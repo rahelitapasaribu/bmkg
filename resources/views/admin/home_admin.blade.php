@@ -26,66 +26,28 @@
 
     <!-- Charts and Analysis Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <!-- Performance Chart -->
+        <!-- Performance Overview -->
         <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold text-gray-900">Performance Overview</h3>
-                <div class="flex space-x-2">
-                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Live Data</span>
+            </div>
+
+            <!-- Bagian 1: Total Sites -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="text-gray-700 font-medium">Total Sites</div>
+                    <div class="text-gray-900 font-bold text-lg">{{ $totalSites }}</div>
                 </div>
             </div>
-            <div class="space-y-4">
-                @php
-                    $performanceRanges = [
-                        'Excellent (≥90%)' => $recapSites
-                            ->filter(fn($site) => $site->avg_sla >= 90 || $site->avg_ola >= 90)
-                            ->count(),
-                        'Good (70-89%)' => $recapSites
-                            ->filter(
-                                fn($site) => ($site->avg_sla >= 70 && $site->avg_sla < 90) ||
-                                    ($site->avg_ola >= 70 && $site->avg_ola < 90),
-                            )
-                            ->count(),
-                        'Fair (50-69%)' => $recapSites
-                            ->filter(
-                                fn($site) => ($site->avg_sla >= 50 && $site->avg_sla < 70) ||
-                                    ($site->avg_ola >= 50 && $site->avg_ola < 70),
-                            )
-                            ->count(),
-                        'Poor (<50%)' => $recapSites
-                            ->filter(
-                                fn($site) => ($site->avg_sla > 0 && $site->avg_sla < 50) ||
-                                    ($site->avg_ola > 0 && $site->avg_ola < 50),
-                            )
-                            ->count(),
-                    ];
-                    $totalSites = $recapSites->count();
-                @endphp
 
-                @foreach ($performanceRanges as $range => $count)
-                    @php
-                        $percentage = $totalSites > 0 ? ($count / $totalSites) * 100 : 0;
-                        $colorClass = match (true) {
-                            str_contains($range, 'Excellent') => 'bg-green-500',
-                            str_contains($range, 'Good') => 'bg-blue-500',
-                            str_contains($range, 'Fair') => 'bg-yellow-500',
-                            default => 'bg-red-500',
-                        };
-                    @endphp
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-4 h-4 {{ $colorClass }} rounded"></div>
-                            <span class="text-gray-700 font-medium">{{ $range }}</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="w-32 bg-gray-200 rounded-full h-2">
-                                <div class="{{ $colorClass }} h-2 rounded-full transition-all duration-500"
-                                    style="width: {{ $percentage }}%"></div>
-                            </div>
-                            <span class="text-gray-900 font-bold text-sm w-12 text-right">{{ $count }}</span>
-                        </div>
+            <!-- Bagian 2: Avg Performance -->
+            <div>
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="text-gray-700 font-medium">Average Performance</div>
+                    <div class="text-gray-900 font-bold text-lg">
+                        {{ round($avgPerformance ?? 0, 1) }}%
                     </div>
-                @endforeach
+                </div>
             </div>
         </div>
 
@@ -154,10 +116,10 @@
                                 <div class="text-sm font-medium text-gray-900">{{ $site->name }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $site->category->name ?? 'Unknown' }}
+                                {{ $site->jenis_alat ?? 'Unknown' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ Str::limit($site->satker->nama_satker ?? 'Unknown', 25) }}
+                                {{ Str::limit($site->satker ?? 'Unknown', 25) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <span class="text-sm font-bold text-gray-900">
@@ -183,7 +145,7 @@
     </div>
 
     <!-- Footer Info -->
-    <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6">
+    {{-- <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <div class="bg-blue-100 rounded-full p-3">
@@ -203,5 +165,5 @@
                 <p class="text-blue-700 text-sm">Next update in 5 minutes</p>
             </div>
         </div>
-    </div>
+    </div> --}}
 @endsection

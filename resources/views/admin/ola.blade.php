@@ -16,7 +16,7 @@
 
         {{-- Tabs --}}
         <div class="border-b mb-4 flex space-x-6">
-            @foreach (['AWOS', 'RADAR', 'AWS', 'AWS Synoptic', 'AWS Maritim', 'AAWS', 'ARG', 'InaTEWS'] as $t)
+            @foreach (['AWOS', 'RADAR', 'AWS DIGI', 'AWS POSMET', 'AWS MARITIM', 'RASON', 'AAWS', 'AWS', 'ARG', 'InaTEWS'] as $t)
                 <a href="{{ route('admin.ola.index', ['tab' => $t, 'year' => $year]) }}"
                     class="pb-2 text-sm font-medium {{ $tab === $t ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-blue-600' }}">
                     {{ $t }}
@@ -32,7 +32,7 @@
                     + Tambah Data
                 </button>
             </div>
-            <form method="GET" action="{{ route('admin.ola.index') }}" class="mb-3">
+            <form method="GET" action="{{ route('admin.ola.index') }}" class="flex space-x-2 mb-3">
                 <input type="hidden" name="tab" value="{{ $tab }}">
                 <select name="year" onchange="this.form.submit()" class="border rounded p-1">
                     @foreach ($availableYears as $y)
@@ -44,11 +44,24 @@
             </form>
         </div>
 
+        {{-- Info jumlah site --}}
+        <div class="mb-4">
+            <span class="text-gray-700 font-semibold">Jumlah Site: </span>
+            <span class="text-blue-600 font-bold">{{ $sites->count() }}</span>
+        </div>
+
+        {{-- Search --}}
+        <div class="mb-4">
+            <input type="text" id="searchInput" placeholder="Cari site..."
+                class="w-full md:w-1/3 border rounded-lg p-2 focus:outline-none focus:ring focus:ring-blue-300">
+        </div>
+
         {{-- Tabel Data --}}
         <div class="overflow-x-auto">
-            <table class="min-w-full border border-gray-200 text-sm">
+            <table class="min-w-full border border-gray-200 text-sm" id="sitesTable">
                 <thead class="bg-gray-100">
                     <tr>
+                        <th class="border px-4 py-2 w-12 text-center">No</th>
                         <th class="border px-4 py-2 w-56 text-left">{{ $tab === 'RADAR' ? 'Lokasi' : 'Nama Site' }}</th>
                         <th class="border px-4 py-2 w-32">Merk</th>
                         <th class="border px-4 py-2 w-40">Stasiun PIC</th>
@@ -60,7 +73,8 @@
                 <tbody>
                     @forelse ($sites as $site)
                         <tr>
-                            <td class="border px-4 py-2 font-medium">{{ $site->name }}</td>
+                            <td class="border px-4 py-2 text-center">{{ $loop->iteration }}</td>
+                            <td class="border px-4 py-2 font-medium">{{ $site->nama_site }}</td>
                             <td class="border px-2 py-2">{{ $site->merk }}</td>
                             <td class="border px-2 py-2">{{ $site->satker->nama_satker ?? '' }}</td>
 
@@ -68,16 +82,16 @@
                                 @php
                                     $perf = $performances
                                         ->where('site_id', $site->id)
-                                        ->where('month', $m)
-                                        ->where('year', $year)
+                                        ->where('bulan', $m)
+                                        ->where('tahun', $year)
                                         ->first();
                                 @endphp
                                 <td class="border px-2 py-2 text-center">
                                     @if ($perf)
-                                        {{ $perf->percentage }}%
+                                        {{ $perf->persentase }}%
                                         <br>
                                         <button type="button"
-                                            onclick="openEditModal({{ $perf->id }}, {{ $perf->site_id }}, {{ $perf->year }}, {{ $perf->month }}, {{ $perf->percentage }})"
+                                            onclick="openEditModal({{ $perf->id }}, {{ $perf->site_id }}, {{ $perf->tahun }}, {{ $perf->bulan }}, {{ $perf->persentase }})"
                                             class="text-xs text-yellow-600 underline">
                                             Edit
                                         </button>
@@ -106,7 +120,7 @@
                     <label class="block text-sm">Site</label>
                     <select name="site_id" id="site_id" class="w-full border rounded p-2">
                         @foreach ($sites as $site)
-                            <option value="{{ $site->id }}">{{ $site->name }}</option>
+                            <option value="{{ $site->id }}">{{ $site->nama_site }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -149,10 +163,9 @@
                     <label class="block text-sm">Site</label>
                     <select name="site_id" id="edit_site_id" class="w-full border rounded p-2" disabled>
                         @foreach ($sites as $site)
-                            <option value="{{ $site->id }}">{{ $site->name }}</option>
+                            <option value="{{ $site->id }}">{{ $site->nama_site }}</option>
                         @endforeach
                     </select>
-                    <!-- agar value tetap terkirim saat submit -->
                     <input type="hidden" name="site_id" id="hidden_edit_site_id">
                 </div>
 
@@ -170,7 +183,6 @@
                     </select>
                     <input type="hidden" name="month" id="hidden_edit_month">
                 </div>
-
 
                 <div class="mb-3">
                     <label class="block text-sm">Persentase</label>
@@ -199,23 +211,25 @@
 
         function openEditModal(id, site_id, year, month, percentage) {
             document.getElementById('edit_id').value = id;
-
             document.getElementById('edit_site_id').value = site_id;
             document.getElementById('hidden_edit_site_id').value = site_id;
-
             document.getElementById('edit_year').value = year;
-
             document.getElementById('edit_month').value = month;
             document.getElementById('hidden_edit_month').value = month;
-
             document.getElementById('edit_percentage').value = percentage;
-
             document.getElementById('editForm').action = `/admin/ola/${id}`;
             document.getElementById('editModal').classList.remove('hidden');
         }
 
-
+        // Live search filter + Select2
         $(document).ready(function() {
+            $('#searchInput').on('keyup', function() {
+                let value = $(this).val().toLowerCase();
+                $("#sitesTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
             $('#site_id, #edit_site_id').select2({
                 width: '100%',
                 placeholder: "Pilih site...",

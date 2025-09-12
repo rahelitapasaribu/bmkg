@@ -19,4 +19,9 @@ class KondisiAlat extends Model
     {
         return $this->hasMany(AlatSatker::class, 'kondisi_id', 'id');
     }
+
+    public function siteSatkers()
+    {
+        return $this->hasMany(SiteSatker::class, 'kondisi_id', 'id');
+    }
 }

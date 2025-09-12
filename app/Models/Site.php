@@ -11,22 +11,27 @@ class Site extends Model
 
     protected $table = 'sites';
     protected $primaryKey = 'id';
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $fillable = [
-        'jenis_alat_id',
-        'satker_id',
+        'id_jenis_alat',
+        'nama_site',
         'merk',
-        'name',
+        'tahun_pengadaan',
     ];
 
     public function jenisAlat()
     {
-        return $this->belongsTo(JenisAlat::class, 'jenis_alat_id', 'id');
+        return $this->belongsTo(JenisAlat::class, 'id_jenis_alat', 'id');
     }
 
-    public function satker()
+    public function siteSatkers()
     {
-        return $this->belongsTo(Satker::class, 'satker_id', 'id');
+        return $this->hasMany(SiteSatker::class, 'site_id', 'id');
+    }
+
+    public function slaOlaNilai()
+    {
+        return $this->hasMany(SlaOlaNilai::class, 'site_id', 'id');
     }
 }

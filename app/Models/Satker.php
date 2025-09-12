@@ -13,11 +13,11 @@ class Satker extends Model
     protected $primaryKey = 'id';
     public $timestamps = false;
 
-    protected $fillable = ['provinsi_id', 'nama_satker', 'latitude', 'longitude'];
+    protected $fillable = ['id_provinsi', 'nama_satker', 'latitude', 'longitude'];
 
     public function provinsi()
     {
-        return $this->belongsTo(Provinsi::class, 'provinsi_id', 'id');
+        return $this->belongsTo(Provinsi::class, 'id_provinsi', 'id');
     }
 
     public function alatSatker()
@@ -27,11 +27,11 @@ class Satker extends Model
 
     public function staf()
     {
-        return $this->hasOne(Staf::class, 'satker_id', 'id');
+        return $this->hasOne(Staf::class, 'id_satker', 'id');
     }
 
-    public function sites()
+    public function siteSatkers()
     {
-        return $this->hasMany(Site::class, 'satker_id', 'id');
+        return $this->hasMany(SiteSatker::class, 'satker_id', 'id');
     }
 }

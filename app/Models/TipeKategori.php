@@ -13,10 +13,10 @@ class TipeKategori extends Model
     protected $primaryKey = 'id';
     public $timestamps = false;
 
-    protected $fillable = ['nama_kategori'];
+    protected $fillable = ['nama_tipe'];
 
     public function slaOlaNilai()
     {
-        return $this->hasMany(SlaOlaNilai::class, 'kategori_id', 'id');
+        return $this->hasMany(SlaOlaNilai::class, 'tipe_id', 'id');
     }
 }
