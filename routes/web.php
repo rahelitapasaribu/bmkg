@@ -32,13 +32,16 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // OLA
-    Route::resource('ola', App\Http\Controllers\Admin\OlaController::class);
-    
-    // SLA
-    Route::resource('sla', App\Http\Controllers\Admin\SlaController::class);
-    // Data UPT
-    Route::resource('dataupt', App\Http\Controllers\Admin\DataUptController::class);
+    Route::resource('ola', OlaController::class);
 
-    Route::post('dataupt/store-alat', [App\Http\Controllers\Admin\DataUptController::class, 'storeAlat'])
-        ->name('dataupt.store-alat');
+    // SLA
+    Route::resource('sla', SlaController::class);
+
+    Route::get('dataupt', [DataUptController::class, 'index'])->name('dataupt.index');
+    Route::get('dataupt/{id}/edit', [DataUptController::class, 'edit'])->name('dataupt.edit');
+    Route::put('dataupt/{id}', [DataUptController::class, 'update'])->name('dataupt.update');
+
+    Route::post('dataupt/store-alat', [DataUptController::class, 'storeAlat'])->name('dataupt.store-alat');
+    Route::delete('dataupt/alat/{id}', [DataUptController::class, 'destroyAlat'])->name('dataupt.destroy-alat');
 });
+

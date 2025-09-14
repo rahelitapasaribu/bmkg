@@ -26,8 +26,7 @@ class OlaController extends Controller
             'InaTEWS'     => 'InaTEWS',
         ];
 
-        // Default langsung ke AWOS, bukan "OLA"
-        $tab = $request->get('tab', 'AWOS');
+        $tab = $request->get('tab', 'rekapan');
         $year = (int) $request->get('year', date('Y'));
 
         // Ambil tipe OLA
@@ -37,8 +36,8 @@ class OlaController extends Controller
         $sitesQuery = Site::with(['jenisAlat', 'siteSatkers.satker'])
             ->orderBy('nama_site');
 
-        if (isset($tabMapping[$tab])) {
-            $namaDb = $tabMapping[$tab];
+        if ($tab !== 'rekapan') {
+            $namaDb = $tabMapping[$tab] ?? $tab; // fallback
             $sitesQuery->whereHas('jenisAlat', function ($q) use ($namaDb) {
                 $q->where('nama_jenis', $namaDb);
             });
@@ -54,8 +53,8 @@ class OlaController extends Controller
             : collect();
 
         // Ambil daftar tahun
-        $years = SlaOlaNilai::where('tipe_id', $kategori->id ?? 0)
-            ->select('tahun')
+        $years = SlaOlaNilai::select('tahun')
+            ->where('tipe_id', $kategori->id ?? 0)
             ->distinct()
             ->orderBy('tahun', 'desc')
             ->pluck('tahun')
@@ -74,12 +73,67 @@ class OlaController extends Controller
             ]);
         }
 
+        // --- Hitung Rekapan --- //
+        $month = (int) $request->get('month', date('n'));
+        $month = null;
+        if ($tab === 'rekapan') {
+            $month = (int) $request->get('month', date('n'));
+        }
+
+        // mapping alat ke kategori
+        $kelompok = [
+            'Geofisika'   => ['InaTEWS'],
+            'Meteorologi' => ['AWOS', 'RADAR', 'AWS DIGI', 'AWS Posmet & Rekayasa', 'AWS MARITIM', 'AWS Rasond'],
+            'Klimatologi' => ['AAWS', 'AWS', 'ARG'],
+        ];
+
+        $rekapan = [];
+        if ($tab === 'rekapan') {
+            foreach ($kelompok as $kategoriNama => $alatList) {
+                $query = SlaOlaNilai::whereHas('site.jenisAlat', function ($q) use ($alatList) {
+                    $q->whereIn('nama_jenis', $alatList);
+                })
+                    ->where('tipe_id', $kategori->id ?? 0)
+                    ->where('tahun', $year);
+
+                if ($month) {
+                    $query->where('bulan', $month);
+                }
+
+                $rekapan[$kategoriNama] = $query->avg('persentase') ?? 0;
+            }
+        }
+
+        $rekapanDetail = [];
+        foreach ($kelompok as $kategoriNama => $alatList) {
+            foreach ($alatList as $alat) {
+                $query = SlaOlaNilai::whereHas('site.jenisAlat', function ($q) use ($alat) {
+                    $q->where('nama_jenis', $alat);
+                })
+                    ->where('tipe_id', $kategori->id ?? 0)
+                    ->where('tahun', $year)
+                    ->where('bulan', $month);
+
+                $jumlah = $query->count();
+                $persentase = $query->avg('persentase') ?? 0;
+
+                $rekapanDetail[$kategoriNama][] = [
+                    'nama'       => $alat,
+                    'jumlah'     => $jumlah,
+                    'persentase' => $persentase,
+                ];
+            }
+        }
+
         return view('admin.ola', [
             'tab'            => $tab,
             'year'           => $year,
+            'month'          => $month,
             'sites'          => $sites,
             'performances'   => $performances,
             'availableYears' => $years,
+            'rekapan'        => $rekapan,
+            'rekapanDetail'  => $rekapanDetail,
         ]);
     }
 
@@ -105,7 +159,7 @@ class OlaController extends Controller
         ]);
 
         return redirect()->route('admin.ola.index', [
-            'tab'  => $request->get('tab', 'AWOS'),
+            'tab'  => $request->get('tab', 'rekapan'),
             'year' => $data['year'],
         ])->with('success', 'Data OLA berhasil ditambahkan.');
     }

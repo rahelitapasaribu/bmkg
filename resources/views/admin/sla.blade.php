@@ -379,8 +379,6 @@
             document.getElementById('editModal').classList.remove('hidden');
         }
 
-
-
         $(document).ready(function() {
             $('#site_id, #edit_site_id').select2({
                 width: '100%',

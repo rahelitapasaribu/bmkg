@@ -8,15 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class DataUptController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        // Ambil data satker dengan relasi provinsi & staf
         $uptData = DB::table('satker as s')
             ->leftJoin('provinsi as p', 's.id_provinsi', '=', 'p.id')
-            ->leftJoin('staf as st', 's.id', '=', 'st.satker_id')
+            ->leftJoin('staf as st', 's.id', '=', 'st.id_satker') // ✅ pakai id_satker
             ->select(
                 's.id',
                 's.nama_satker',
@@ -28,17 +24,18 @@ class DataUptController extends Controller
                 'st.ppnpn_laki',
                 'st.ppnpn_perempuan'
             )
+            ->orderBy('p.nama_provinsi', 'asc')
+            ->orderBy('s.nama_satker', 'asc')
             ->get()
             ->map(function ($item) {
-                // Ambil data alat untuk setiap UPT
+                // alat_satker pakai satker_id
                 $item->alat_satker = DB::table('alat_satker as als')
-                    ->join('jenis_alat as ja', 'als.jenis_alat_id', '=', 'ja.id')
-                    ->join('kondisi_alat as ka', 'als.kondisi_id', '=', 'ka.id')
-                    ->where('als.satker_id', $item->id)
+                    ->leftJoin('jenis_alat as ja', 'als.jenis_alat_id', '=', 'ja.id')
+                    ->leftJoin('kondisi_alat as ka', 'als.kondisi_id', '=', 'ka.id')
+                    ->where('als.satker_id', $item->id) // ✅ pakai satker_id
                     ->select('ja.nama_jenis', 'ka.nama_kondisi', 'als.jumlah')
                     ->get();
 
-                // Convert ke object biar gampang dipakai di Blade
                 $item->provinsi = (object)['nama_provinsi' => $item->nama_provinsi];
                 $item->staf = (object)[
                     'asn_laki' => $item->asn_laki ?? 0,
@@ -57,16 +54,13 @@ class DataUptController extends Controller
         return view('admin.dataupt', compact('uptData', 'provinsi', 'jenisAlat', 'kondisi'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'nama_satker' => 'required|string|max:255',
             'id_provinsi' => 'required|exists:provinsi,id',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'asn_laki' => 'nullable|integer|min:0',
             'asn_perempuan' => 'nullable|integer|min:0',
             'ppnpn_laki' => 'nullable|integer|min:0',
@@ -74,7 +68,6 @@ class DataUptController extends Controller
         ]);
 
         DB::beginTransaction();
-
         try {
             $satkerId = DB::table('satker')->insertGetId([
                 'nama_satker' => $request->nama_satker,
@@ -84,7 +77,7 @@ class DataUptController extends Controller
             ]);
 
             DB::table('staf')->insert([
-                'satker_id' => $satkerId,
+                'id_satker' => $satkerId, // ✅ pakai id_satker
                 'asn_laki' => $request->asn_laki ?? 0,
                 'asn_perempuan' => $request->asn_perempuan ?? 0,
                 'ppnpn_laki' => $request->ppnpn_laki ?? 0,
@@ -92,24 +85,18 @@ class DataUptController extends Controller
             ]);
 
             DB::commit();
-
-            return redirect()->route('admin.dataupt.index')
-                ->with('success', 'Data UPT berhasil ditambahkan!');
+            return redirect()->route('admin.dataupt.index')->with('success', 'Data UPT berhasil ditambahkan!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        // Ambil data satker + staf
         $upt = DB::table('satker as s')
-            ->leftJoin('staf as st', 's.id', '=', 'st.satker_id')
+            ->leftJoin('staf as st', 's.id', '=', 'st.id_satker') // relasi staf
             ->where('s.id', $id)
             ->select(
                 's.id',
@@ -125,24 +112,52 @@ class DataUptController extends Controller
             ->first();
 
         if (!$upt) {
-            return redirect()->route('admin.dataupt.index')->with('error', 'Data tidak ditemukan!');
+            return redirect()->route('admin.dataupt.index')
+                ->with('error', 'Data tidak ditemukan!');
         }
 
-        $provinsi = DB::table('provinsi')->orderBy('nama_provinsi')->get();
+        // Ambil daftar alat yang terkait dengan satker ini
+        $upt->alat_satker = DB::table('alat_satker as als')
+            ->leftJoin('jenis_alat as ja', 'als.jenis_alat_id', '=', 'ja.id')
+            ->leftJoin('kondisi_alat as ka', 'als.kondisi_id', '=', 'ka.id')
+            ->where('als.satker_id', $id)
+            ->select(
+                'als.id',
+                'ja.nama_jenis',
+                'ka.nama_kondisi',
+                'als.jumlah'
+            )
+            ->get();
 
-        return view('admin.dataupt-edit', compact('upt', 'provinsi'));  
+        // Buat object staf supaya aman dipanggil di Blade
+        $upt->staf = (object)[
+            'asn_laki' => $upt->asn_laki ?? 0,
+            'asn_perempuan' => $upt->asn_perempuan ?? 0,
+            'ppnpn_laki' => $upt->ppnpn_laki ?? 0,
+            'ppnpn_perempuan' => $upt->ppnpn_perempuan ?? 0,
+        ];
+
+        // Data tambahan untuk dropdown
+        $provinsi = DB::table('provinsi')->orderBy('nama_provinsi')->get();
+        $jenisAlat = DB::table('jenis_alat')->orderBy('nama_jenis')->get();
+        $kondisi   = DB::table('kondisi_alat')->orderBy('nama_kondisi')->get();
+
+        // Kalau AJAX → kirim JSON
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json($upt);
+        }
+
+        // Kalau buka halaman edit
+        return view('admin.dataupt-edit', compact('upt', 'provinsi', 'jenisAlat', 'kondisi'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
             'nama_satker' => 'required|string|max:255',
             'id_provinsi' => 'required|exists:provinsi,id',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'asn_laki' => 'nullable|integer|min:0',
             'asn_perempuan' => 'nullable|integer|min:0',
             'ppnpn_laki' => 'nullable|integer|min:0',
@@ -150,31 +165,26 @@ class DataUptController extends Controller
         ]);
 
         DB::beginTransaction();
-
         try {
-            DB::table('satker')
-                ->where('id', $id)
-                ->update([
-                    'nama_satker' => $request->nama_satker,
-                    'id_provinsi' => $request->id_provinsi,
-                    'latitude' => $request->latitude,
-                    'longitude' => $request->longitude
-                ]);
+            DB::table('satker')->where('id', $id)->update([
+                'nama_satker' => $request->nama_satker,
+                'id_provinsi' => $request->id_provinsi,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+            ]);
 
-            $existingStaf = DB::table('staf')->where('satker_id', $id)->first();
+            $existingStaf = DB::table('staf')->where('id_satker', $id)->first(); // ✅ id_satker
 
             if ($existingStaf) {
-                DB::table('staf')
-                    ->where('satker_id', $id)
-                    ->update([
-                        'asn_laki' => $request->asn_laki ?? 0,
-                        'asn_perempuan' => $request->asn_perempuan ?? 0,
-                        'ppnpn_laki' => $request->ppnpn_laki ?? 0,
-                        'ppnpn_perempuan' => $request->ppnpn_perempuan ?? 0,
-                    ]);
+                DB::table('staf')->where('id_satker', $id)->update([ // ✅ id_satker
+                    'asn_laki' => $request->asn_laki ?? 0,
+                    'asn_perempuan' => $request->asn_perempuan ?? 0,
+                    'ppnpn_laki' => $request->ppnpn_laki ?? 0,
+                    'ppnpn_perempuan' => $request->ppnpn_perempuan ?? 0,
+                ]);
             } else {
                 DB::table('staf')->insert([
-                    'satker_id' => $id,
+                    'id_satker' => $id, // ✅ id_satker
                     'asn_laki' => $request->asn_laki ?? 0,
                     'asn_perempuan' => $request->asn_perempuan ?? 0,
                     'ppnpn_laki' => $request->ppnpn_laki ?? 0,
@@ -183,20 +193,13 @@ class DataUptController extends Controller
             }
 
             DB::commit();
-
-            return redirect()->route('admin.dataupt.index')
-                ->with('success', 'Data UPT berhasil diperbarui!');
+            return redirect()->route('admin.dataupt.index')->with('success', 'Data UPT berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
-    /**
-     * Store alat for specific UPT
-     */
     public function storeAlat(Request $request)
     {
         $request->validate([
@@ -207,29 +210,24 @@ class DataUptController extends Controller
         ]);
 
         $existing = DB::table('alat_satker')
-            ->where('satker_id', $request->satker_id)
+            ->where('satker_id', $request->satker_id) // ✅ satker_id
             ->where('jenis_alat_id', $request->jenis_alat_id)
             ->where('kondisi_id', $request->kondisi_id)
             ->first();
 
         if ($existing) {
-            DB::table('alat_satker')
-                ->where('id', $existing->id)
-                ->update([
-                    'jumlah' => DB::raw('jumlah + ' . $request->jumlah),
-                ]);
+            DB::table('alat_satker')->where('id', $existing->id)->update([
+                'jumlah' => DB::raw('jumlah + ' . (int) $request->jumlah),
+            ]);
         } else {
             DB::table('alat_satker')->insert([
-                'satker_id' => $request->satker_id,
+                'satker_id' => $request->satker_id, // ✅ satker_id
                 'jenis_alat_id' => $request->jenis_alat_id,
                 'kondisi_id' => $request->kondisi_id,
                 'jumlah' => $request->jumlah,
             ]);
         }
 
-        return redirect()->route('admin.dataupt.index')
-            ->with('success', 'Alat berhasil ditambahkan!');
+        return redirect()->route('admin.dataupt.index')->with('success', 'Alat berhasil ditambahkan!');
     }
-
-    // show & destroy masih kosong, bisa ditambah kalau diperlukan
 }
