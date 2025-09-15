@@ -16,8 +16,8 @@
                 </div>
                 <div class="text-right">
                     <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-4">
-                        <div class="text-white text-sm">Last Update</div>
-                        <div class="text-white font-bold text-lg">{{ date('H:i') }} WIB</div>
+                        <div class="text-white text-center">Last Update</div>
+                        <div class="text-white font-bold text-lg">{{ date('H:i') }} WITA</div>
                     </div>
                 </div>
             </div>
@@ -161,7 +161,7 @@
                 </div>
             </div>
             <div class="text-right">
-                <p class="text-blue-900 font-medium">Last Sync: {{ date('H:i:s') }} WIB</p>
+                <p class="text-blue-900 font-medium">Last Sync: {{ date('H:i:s') }} WITA</p>
                 <p class="text-blue-700 text-sm">Next update in 5 minutes</p>
             </div>
         </div>

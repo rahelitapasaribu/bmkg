@@ -34,4 +34,16 @@ class Satker extends Model
     {
         return $this->hasMany(SiteSatker::class, 'satker_id', 'id');
     }
+
+    public function sites()
+    {
+        return $this->hasManyThrough(
+            Site::class,
+            SiteSatker::class,
+            'satker_id', // Foreign key on SiteSatker table
+            'id',        // Foreign key on Site table
+            'id',        // Local key on Satker table
+            'site_id'    // Local key on SiteSatker table
+        );
+    }
 }

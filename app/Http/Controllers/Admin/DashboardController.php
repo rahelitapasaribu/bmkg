@@ -48,7 +48,7 @@ class DashboardController extends Controller
                     'rata2_nilai' => $items->avg('persentase'),
                 ];
             });
-
+        
         // Hitung total site
         $totalSites = $recapSites->count();
 

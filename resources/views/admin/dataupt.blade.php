@@ -27,7 +27,7 @@
                     <tr>
                         <td class="border border-gray-300 px-4 py-2 text-center">{{ $index + 1 }}</td>
                         <td class="border border-gray-300 px-4 py-2">{{ $upt->nama_satker }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ $upt->nama_provinsi }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ $upt->nama_provinsi }}</td>
                         <td class="border border-gray-300 px-4 py-2 text-center">
                             <a href="{{ route('admin.dataupt.edit', $upt->id) }}"
                                 class="bg-blue-500 text-white px-3 py-1 rounded">Edit</a>

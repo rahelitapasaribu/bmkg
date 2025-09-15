@@ -34,4 +34,16 @@ class Site extends Model
     {
         return $this->hasMany(SlaOlaNilai::class, 'site_id', 'id');
     }
+
+    public function satker()
+    {
+        return $this->hasOneThrough(
+            Satker::class,
+            SiteSatker::class,
+            'site_id', // Foreign key on SiteSatker table
+            'id',      // Foreign key on Satker table
+            'id',      // Local key on Site table
+            'satker_id' // Local key on SiteSatker table
+        );
+    }
 }
