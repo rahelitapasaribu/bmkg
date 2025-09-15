@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OlaController;
 use App\Http\Controllers\Admin\SlaController;
 use App\Http\Controllers\Admin\DataUptController;
+use App\Http\Controllers\Admin\SiteController;
 
 // ==========================
 // Public Routes
@@ -43,5 +44,15 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::post('dataupt/store-alat', [DataUptController::class, 'storeAlat'])->name('dataupt.store-alat');
     Route::delete('dataupt/alat/{id}', [DataUptController::class, 'destroyAlat'])->name('dataupt.destroy-alat');
-});
 
+    // Sites
+    Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
+    Route::post('sites/jenis', [SiteController::class, 'storeJenis'])->name('sites.storeJenis');
+    Route::post('sites', [SiteController::class, 'storeSite'])->name('sites.store');
+    Route::put('sites/{id}', [SiteController::class, 'updateSite'])->name('sites.update');
+
+    Route::post('sites/store-alat', [SiteController::class, 'storeAlat'])->name('sites.store-alat');
+    Route::put('sites/update-alat/{id}', [SiteController::class, 'updateAlat'])->name('sites.updateAlat');
+    Route::delete('sites/destroy-alat/{id}', [SiteController::class, 'destroyAlat'])->name('sites.destroy-alat');
+    Route::put('sites/update-alat/{jenis}/{satker}', [SiteController::class, 'updateAlatGroup'])->name('admin.sites.update-alat-group');
+});

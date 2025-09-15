@@ -100,9 +100,7 @@
 
             {{-- Data Alat --}}
             <div class="border-t pt-4 mt-6">
-                <h3 class="text-lg font-semibold mb-3">Data Alat</h3>
-
-                {{-- Daftar Alat --}}
+                <h3 class="text-lg font-semibold mb-3">Data Alat Satker</h3>
                 <table class="w-full border mb-4 text-sm">
                     <thead class="bg-gray-100">
                         <tr>
@@ -117,14 +115,12 @@
                             <tr>
                                 <td class="border px-2 py-1">{{ $alat->nama_jenis }}</td>
                                 <td class="border px-2 py-1">{{ $alat->nama_kondisi }}</td>
-                                <td class="border px-2 py-1">{{ $alat->jumlah }}</td>
+                                <td class="border px-2 py-1 text-center">{{ $alat->jumlah }}</td>
                                 <td class="border px-2 py-1 text-center">
-                                    <form action="{{ route('admin.dataupt.destroy-alat', $alat->id) }}" method="POST"
-                                        class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:underline text-xs">Hapus</button>
-                                    </form>
+                                    <a href="{{ route('admin.sites.index', ['jenis_alat_id' => $alat->jenis_alat_id]) }}"
+                                        class="text-blue-600 hover:underline text-sm">
+                                        Edit
+                                    </a>
                                 </td>
                             </tr>
                         @empty
@@ -134,41 +130,47 @@
                         @endforelse
                     </tbody>
                 </table>
-
-                {{-- Tambah Alat --}}
-                <form action="{{ route('admin.dataupt.store-alat') }}" method="POST"
-                    class="grid grid-cols-4 gap-3 items-end">
-                    @csrf
-                    <input type="hidden" name="id_satker" value="{{ $upt->id }}">
-                    <div>
-                        <label class="block text-sm">Jenis</label>
-                        <select name="jenis_alat_id" class="w-full border rounded p-2" required>
-                            <option value="">Pilih</option>
-                            @foreach ($jenisAlat as $j)
-                                <option value="{{ $j->id }}">{{ $j->nama_jenis }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm">Kondisi</label>
-                        <select name="kondisi_id" class="w-full border rounded p-2" required>
-                            <option value="">Pilih</option>
-                            @foreach ($kondisi as $k)
-                                <option value="{{ $k->id }}">{{ $k->nama_kondisi }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm">Jumlah</label>
-                        <input type="number" name="jumlah" min="1" value="1"
-                            class="w-full border rounded p-2">
-                    </div>
-                    <div>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">+ Tambah</button>
-                    </div>
-                </form>
             </div>
 
+            {{-- Data Site --}}
+            <div class="border-t pt-4 mt-6">
+                <h3 class="text-lg font-semibold mb-3">Data Site Satker</h3>
+                <table class="w-full border mb-4 text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="border px-2 py-1">Nama Site</th>
+                            <th class="border px-2 py-1">Merk</th>
+                            <th class="border px-2 py-1">Tahun</th>
+                            <th class="border px-2 py-1">Jenis Alat</th>
+                            <th class="border px-2 py-1">Kondisi</th>
+                            <th class="border px-2 py-1">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($upt->site_satker as $site)
+                            <tr>
+                                <td class="border px-2 py-1">{{ $site->nama_site }}</td>
+                                <td class="border px-2 py-1">{{ $site->merk ?? '-' }}</td>
+                                <td class="border px-2 py-1">{{ $site->tahun_pengadaan ?? '-' }}</td>
+                                <td class="border px-2 py-1">
+                                    {{ $jenisAlat->firstWhere('id', $site->id_jenis_alat)->nama_jenis ?? '-' }}
+                                </td>
+                                <td class="border px-2 py-1">{{ $site->nama_kondisi ?? '-' }}</td>
+                                <td class="border px-2 py-1 text-center">
+                                    <a href="{{ route('admin.sites.index', ['jenis_alat_id' => $site->id_jenis_alat]) }}"
+                                        class="text-blue-600 hover:underline text-sm">
+                                        Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-gray-500 py-2">Belum ada site</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
             {{-- Tombol --}}
             <div class="mt-6 flex justify-between">

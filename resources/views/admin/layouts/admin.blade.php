@@ -16,7 +16,7 @@
                     colors: {
                         bmkg: {
                             50: '#eff6ff',
-                            100: '#dbeafe', 
+                            100: '#dbeafe',
                             200: '#bfdbfe',
                             300: '#93c5fd',
                             400: '#60a5fa',
@@ -36,13 +36,16 @@
         ::-webkit-scrollbar {
             width: 6px;
         }
+
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 3px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
@@ -54,8 +57,8 @@
 
         /* Background pattern */
         body {
-            background-image: 
-                radial-gradient(circle at 25px 25px, rgba(59, 130, 246, 0.1) 2%, transparent 0%), 
+            background-image:
+                radial-gradient(circle at 25px 25px, rgba(59, 130, 246, 0.1) 2%, transparent 0%),
                 radial-gradient(circle at 75px 75px, rgba(147, 197, 253, 0.1) 2%, transparent 0%);
             background-size: 100px 100px;
         }
@@ -71,8 +74,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Pulse animation for active states */
@@ -81,8 +89,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
     </style>
 </head>
@@ -93,7 +108,8 @@
     <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-gradient-to-br from-bmkg-600 via-bmkg-700 to-bmkg-800 text-white shadow-2xl z-50 transform transition-transform duration-300 lg:translate-x-0 -translate-x-full">
+    <aside id="sidebar"
+        class="fixed top-0 left-0 h-screen w-64 bg-gradient-to-br from-bmkg-600 via-bmkg-700 to-bmkg-800 text-white shadow-2xl z-50 transform transition-transform duration-300 lg:translate-x-0 -translate-x-full">
         <!-- Sidebar Header -->
         <div class="relative bg-gradient-to-r from-white/10 to-transparent p-6 border-b border-white/10">
             <div class="flex items-center justify-center flex-col">
@@ -118,14 +134,15 @@
                 <li>
                     <a href="{{ route('admin.dashboard') }}"
                         class="group flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-white/20 text-white shadow-lg border-l-4 border-white' : 'hover:bg-white/10 hover:translate-x-1' }}">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
+                        <div
+                            class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
                             <i class="fas fa-chart-line text-lg"></i>
                         </div>
                         <div class="flex-1">
                             <span class="font-medium">Dashboard</span>
                             <p class="text-xs text-white/70">Overview & Analytics</p>
                         </div>
-                        @if(request()->routeIs('admin.dashboard'))
+                        @if (request()->routeIs('admin.dashboard'))
                             <i class="fas fa-chevron-right text-sm"></i>
                         @endif
                     </a>
@@ -135,13 +152,14 @@
                 <li>
                     <a href="{{ route('admin.sla.index') }}"
                         class="group flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.sla.*') ? 'bg-white/20 text-white shadow-lg border-l-4 border-white' : 'hover:bg-white/10 hover:translate-x-1' }}">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.sla.*') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
+                        <div
+                            class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.sla.*') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
                             <i class="fas fa-file-contract text-lg"></i>
                         </div>
                         <div class="flex-1">
                             <span class="font-medium">SLA Management</span>
                         </div>
-                        @if(request()->routeIs('admin.sla.*'))
+                        @if (request()->routeIs('admin.sla.*'))
                             <i class="fas fa-chevron-right text-sm"></i>
                         @endif
                     </a>
@@ -150,13 +168,14 @@
                 <li>
                     <a href="{{ route('admin.ola.index') }}"
                         class="group flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.ola.*') ? 'bg-white/20 text-white shadow-lg border-l-4 border-white' : 'hover:bg-white/10 hover:translate-x-1' }}">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.ola.*') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
+                        <div
+                            class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.ola.*') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
                             <i class="fas fa-cogs text-lg"></i>
                         </div>
                         <div class="flex-1">
                             <span class="font-medium">OLA Management</span>
                         </div>
-                        @if(request()->routeIs('admin.ola.*'))
+                        @if (request()->routeIs('admin.ola.*'))
                             <i class="fas fa-chevron-right text-sm"></i>
                         @endif
                     </a>
@@ -165,24 +184,42 @@
                 <li>
                     <a href="{{ route('admin.dataupt.index') }}"
                         class="group flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.dataupt.*') ? 'bg-white/20 text-white shadow-lg border-l-4 border-white' : 'hover:bg-white/10 hover:translate-x-1' }}">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.dataupt.*') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
+                        <div
+                            class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.dataupt.*') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
                             <i class="fas fa-file-contract text-lg"></i>
                         </div>
                         <div class="flex-1">
                             <span class="font-medium">Data Management</span>
                         </div>
-                        @if(request()->routeIs('admin.dataupt.*'))
+                        @if (request()->routeIs('admin.dataupt.*'))
                             <i class="fas fa-chevron-right text-sm"></i>
                         @endif
                     </a>
                 </li>
+
+                <li>
+                    <a href="{{ route('admin.sites.index') }}"
+                        class="group flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.sites.*') ? 'bg-white/20 text-white shadow-lg border-l-4 border-white' : 'hover:bg-white/10 hover:translate-x-1' }}">
+                        <div
+                            class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('admin.sites.*') ? 'bg-white/20' : 'bg-white/10 group-hover:bg-white/20' }} mr-3">
+                            <i class="fas fa-map-marker-alt text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-medium">Data Site</span>
+                        </div>
+                        @if (request()->routeIs('admin.sites.*'))
+                            <i class="fas fa-chevron-right text-sm"></i>
+                        @endif
+                    </a>
+                </li>
+
                 <!-- Divider -->
                 <li class="px-4 py-2">
                     <div class="border-t border-white/10"></div>
                 </li>
             </ul>
         </nav>
-        </aside>
+    </aside>
 
     <!-- Main Content -->
     <main class="lg:ml-64 transition-all duration-300">
@@ -192,7 +229,8 @@
                 <!-- Left Section -->
                 <div class="flex items-center space-x-4">
                     <!-- Mobile Menu Button -->
-                    <button id="openSidebar" class="lg:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                    <button id="openSidebar"
+                        class="lg:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
                         <i class="fas fa-bars text-gray-600"></i>
                     </button>
 
@@ -235,7 +273,8 @@
                     <div class="flex items-center space-x-4 mb-4 md:mb-0">
                         <img src="{{ asset('images/Logo-BMKG.png') }}" alt="BMKG" class="w-8 h-8 object-contain">
                         <div>
-                            <p class="text-sm font-medium text-gray-900">Badan Meteorologi, Klimatologi, dan Geofisika</p>
+                            <p class="text-sm font-medium text-gray-900">Badan Meteorologi, Klimatologi, dan Geofisika
+                            </p>
                             <p class="text-xs text-gray-500">Republic of Indonesia</p>
                         </div>
                     </div>
@@ -292,7 +331,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('nav a');
-            
+
             navLinks.forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
                     link.classList.add('active');

@@ -12,7 +12,7 @@ class DataUptController extends Controller
     {
         $uptData = DB::table('satker as s')
             ->leftJoin('provinsi as p', 's.id_provinsi', '=', 'p.id')
-            ->leftJoin('staf as st', 's.id', '=', 'st.id_satker') // ✅ pakai id_satker
+            ->leftJoin('staf as st', 's.id', '=', 'st.id_satker')
             ->select(
                 's.id',
                 's.nama_satker',
@@ -28,12 +28,11 @@ class DataUptController extends Controller
             ->orderBy('s.nama_satker', 'asc')
             ->get()
             ->map(function ($item) {
-                // alat_satker pakai satker_id
                 $item->alat_satker = DB::table('alat_satker as als')
                     ->leftJoin('jenis_alat as ja', 'als.jenis_alat_id', '=', 'ja.id')
                     ->leftJoin('kondisi_alat as ka', 'als.kondisi_id', '=', 'ka.id')
-                    ->where('als.satker_id', $item->id) // ✅ pakai satker_id
-                    ->select('ja.nama_jenis', 'ka.nama_kondisi', 'als.jumlah')
+                    ->where('als.satker_id', $item->id)
+                    ->select('als.id', 'als.jenis_alat_id', 'ja.nama_jenis', 'ka.nama_kondisi', 'als.jumlah', 'ja.punya_site')
                     ->get();
 
                 $item->provinsi = (object)['nama_provinsi' => $item->nama_provinsi];
@@ -47,9 +46,9 @@ class DataUptController extends Controller
                 return $item;
             });
 
-        $provinsi = DB::table('provinsi')->orderBy('nama_provinsi')->get();
+        $provinsi  = DB::table('provinsi')->orderBy('nama_provinsi')->get();
         $jenisAlat = DB::table('jenis_alat')->orderBy('nama_jenis')->get();
-        $kondisi = DB::table('kondisi_alat')->orderBy('nama_kondisi')->get();
+        $kondisi   = DB::table('kondisi_alat')->orderBy('nama_kondisi')->get();
 
         return view('admin.dataupt', compact('uptData', 'provinsi', 'jenisAlat', 'kondisi'));
     }
@@ -92,11 +91,10 @@ class DataUptController extends Controller
         }
     }
 
-    public function edit(Request $request, $id)
+    public function edit($id)
     {
-        // Ambil data satker + staf
         $upt = DB::table('satker as s')
-            ->leftJoin('staf as st', 's.id', '=', 'st.id_satker') // relasi staf
+            ->leftJoin('staf as st', 's.id', '=', 'st.id_satker')
             ->where('s.id', $id)
             ->select(
                 's.id',
@@ -112,24 +110,37 @@ class DataUptController extends Controller
             ->first();
 
         if (!$upt) {
-            return redirect()->route('admin.dataupt.index')
-                ->with('error', 'Data tidak ditemukan!');
+            return redirect()->route('admin.dataupt.index')->with('error', 'Data tidak ditemukan!');
         }
 
-        // Ambil daftar alat yang terkait dengan satker ini
         $upt->alat_satker = DB::table('alat_satker as als')
             ->leftJoin('jenis_alat as ja', 'als.jenis_alat_id', '=', 'ja.id')
             ->leftJoin('kondisi_alat as ka', 'als.kondisi_id', '=', 'ka.id')
             ->where('als.satker_id', $id)
             ->select(
                 'als.id',
+                'als.jenis_alat_id',
                 'ja.nama_jenis',
                 'ka.nama_kondisi',
-                'als.jumlah'
+                'als.jumlah',
+                'ja.punya_site'
             )
             ->get();
 
-        // Buat object staf supaya aman dipanggil di Blade
+        $upt->site_satker = DB::table('site_satker as ss')
+            ->join('sites as s', 'ss.site_id', '=', 's.id')
+            ->leftJoin('kondisi_alat as ka', 'ss.kondisi_id', '=', 'ka.id')
+            ->where('ss.satker_id', $id)
+            ->select(
+                's.id',
+                's.nama_site',
+                's.merk',
+                's.tahun_pengadaan',
+                's.id_jenis_alat',
+                'ka.nama_kondisi'
+            )
+            ->get();
+
         $upt->staf = (object)[
             'asn_laki' => $upt->asn_laki ?? 0,
             'asn_perempuan' => $upt->asn_perempuan ?? 0,
@@ -137,17 +148,10 @@ class DataUptController extends Controller
             'ppnpn_perempuan' => $upt->ppnpn_perempuan ?? 0,
         ];
 
-        // Data tambahan untuk dropdown
-        $provinsi = DB::table('provinsi')->orderBy('nama_provinsi')->get();
+        $provinsi  = DB::table('provinsi')->orderBy('nama_provinsi')->get();
         $jenisAlat = DB::table('jenis_alat')->orderBy('nama_jenis')->get();
         $kondisi   = DB::table('kondisi_alat')->orderBy('nama_kondisi')->get();
 
-        // Kalau AJAX → kirim JSON
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json($upt);
-        }
-
-        // Kalau buka halaman edit
         return view('admin.dataupt-edit', compact('upt', 'provinsi', 'jenisAlat', 'kondisi'));
     }
 

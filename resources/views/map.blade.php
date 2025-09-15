@@ -57,29 +57,29 @@
                 </div>
 
                 <!-- Pegawai Content -->
-<div id="pegawaiContent" class="space-y-2">
-    <table class="table-auto w-full border border-gray-200">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="px-4 py-2 border">Kategori</th>
-                <th class="px-4 py-2 border">Laki-laki</th>
-                <th class="px-4 py-2 border">Perempuan</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="px-4 py-2 border">ASN</td>
-                <td class="px-4 py-2 border text-center"><span id="asnLaki">-</span></td>
-                <td class="px-4 py-2 border text-center"><span id="asnPerempuan">-</span></td>
-            </tr>
-            <tr>
-                <td class="px-4 py-2 border">PPNPN</td>
-                <td class="px-4 py-2 border text-center"><span id="ppnpnLaki">-</span></td>
-                <td class="px-4 py-2 border text-center"><span id="ppnpnPerempuan">-</span></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+                <div id="pegawaiContent" class="space-y-2">
+                    <table class="table-auto w-full border border-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-2 border">Kategori</th>
+                                <th class="px-4 py-2 border">Laki-laki</th>
+                                <th class="px-4 py-2 border">Perempuan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="px-4 py-2 border">ASN</td>
+                                <td class="px-4 py-2 border text-center"><span id="asnLaki">-</span></td>
+                                <td class="px-4 py-2 border text-center"><span id="asnPerempuan">-</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 border">PPNPN</td>
+                                <td class="px-4 py-2 border text-center"><span id="ppnpnLaki">-</span></td>
+                                <td class="px-4 py-2 border text-center"><span id="ppnpnPerempuan">-</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <!-- Alat Content -->
                 <div id="alatContent" class="hidden">
@@ -113,7 +113,7 @@
             xmlns="http://www.w3.org/2000/svg">
             <polygon points="8,12 16,6 16,18" />
         </svg>
-    </button> 
+    </button>
 
 
     <!-- Leaflet JS -->
@@ -192,7 +192,7 @@
             document.getElementById("ppnpnPerempuan").innerText = staf.ppnpn_perempuan ?? 0;
 
             // isi tab Alat (relasi 'alat_satker' -> 'alat')
-            document.getElementById("alatContent").innerHTML = renderAlatTable(s.alat_satker || []);
+            document.getElementById("alatContent").innerHTML = renderAlatTable(s);
 
             // default ke tab Pegawai tiap kali buka
             switchTab("pegawai");
@@ -370,31 +370,63 @@
 
         }
 
-        // ===== builder tabel alat =====
-        function renderAlatTable(items = []) {
-            if (!items || items.length === 0) {
-                return `<div class="text-gray-500 text-sm">Tidak ada data alat</div>`;
-            }
-            const rows = items.map(it => `
-    <tr>
-      <td class="px-3 py-2 border border-gray-200">${it.alat?.nama_alat ?? '-'}</td>
-      <td class="px-3 py-2 border border-gray-200 text-center">${it.jumlah ?? 0}</td>
-    </tr>
-  `).join("");
-            return `
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm border border-gray-200 rounded-md">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="px-3 py-2 text-center">Nama Alat</th>
-            <th class="px-3 py-2 text-center">Jumlah</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  `;
+        function renderAlatTable(satker) {
+            let alat = satker.alat_satker || [];
+            let sites = satker.site_satkers || [];
+
+            let alatRows = alat.map(it => `
+        <tr>
+            <td class="px-3 py-2 border">${it.jenis_alat?.nama_jenis ?? '-'}</td>
+            <td class="px-3 py-2 border">${it.kondisi?.nama_kondisi ?? '-'}</td>
+            <td class="px-3 py-2 border text-center">${it.jumlah ?? 0}</td>
+        </tr>
+    `).join("");
+
+            let siteRows = sites.map(ss => `
+        <tr>
+            <td class="px-3 py-2 border">${ss.site?.nama_site ?? '-'}</td>
+            <td class="px-3 py-2 border">${ss.site?.merk ?? '-'}</td>
+            <td class="px-3 py-2 border">${ss.site?.tahun_pengadaan ?? '-'}</td>
+            <td class="px-3 py-2 border">${satker.nama_satker ?? '-'}</td>
+            <td class="px-3 py-2 border">${ss.kondisi?.nama_kondisi ?? '-'}</td>
+        </tr>
+    `).join("");
+
+            let alatTable = `
+        <div class="mb-4">
+            <h4 class="font-semibold mb-2 text-[#01377D]">Rekap Alat</h4>
+            <table class="w-full text-sm border border-gray-200 rounded-md">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-3 py-2 text-center">Jenis Alat</th>
+                        <th class="px-3 py-2 text-center">Kondisi</th>
+                        <th class="px-3 py-2 text-center">Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>${alatRows || '<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada data</td></tr>'}</tbody>
+            </table>
+        </div>`;
+
+            let siteTable = `
+        <div class="mb-4">
+            <h4 class="font-semibold mb-2 text-[#01377D]">Daftar Site</h4>
+            <table class="w-full text-sm border border-gray-200 rounded-md">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-3 py-2 text-center">Nama Site</th>
+                        <th class="px-3 py-2 text-center">Merk</th>
+                        <th class="px-3 py-2 text-center">Tahun</th>
+                        <th class="px-3 py-2 text-center">Stasiun PIC</th>
+                        <th class="px-3 py-2 text-center">Kondisi</th>
+                    </tr>
+                </thead>
+                <tbody>${siteRows || '<tr><td colspan="5" class="text-center py-2 text-gray-500">Tidak ada data</td></tr>'}</tbody>
+            </table>
+        </div>`;
+
+            return alatTable + siteTable;
         }
+
 
         // ===== posisikan handle saat load & resize =====
         window.addEventListener("resize", positionHandle);

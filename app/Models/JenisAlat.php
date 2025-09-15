@@ -13,7 +13,12 @@ class JenisAlat extends Model
     protected $primaryKey = 'id';
     public $timestamps = true;
 
-    protected $fillable = ['nama_jenis'];
+    protected $fillable = ['nama_jenis', 'punya_site'];
+
+    protected $casts = [
+        'punya_site' => 'boolean',
+    ];
+
 
     public function alatSatker()
     {
