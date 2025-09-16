@@ -224,11 +224,19 @@
 
                                 @foreach ($list as $alat)
                                     <tr>
-                                        <td class="border px-2 py-1 text-center">{{ $loop->parent->iteration }}</td>
-                                        <td class="border px-2 py-1">{{ $namaSatker }}</td>
+                                        @if ($loop->first)
+                                            <td class="border px-2 py-1 text-center" rowspan="{{ $list->count() }}">
+                                                {{ $loop->parent->iteration }}
+                                            </td>
+                                            <td class="border px-2 py-1" rowspan="{{ $list->count() }}">
+                                                {{ $namaSatker }}
+                                            </td>
+                                        @endif
+
                                         <td class="border px-2 py-1">{{ $alat->nama_jenis }}</td>
                                         <td class="border px-2 py-1">{{ $alat->nama_kondisi }}</td>
                                         <td class="border px-2 py-1 text-center">{{ $alat->jumlah }}</td>
+
                                         @if ($loop->first)
                                             <td class="border px-2 py-1 text-center font-semibold"
                                                 rowspan="{{ $list->count() }}">
