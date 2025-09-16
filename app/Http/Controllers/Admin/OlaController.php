@@ -4,92 +4,141 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\SlaOlaNilai;
+use App\Models\TipeKategori;
 use App\Models\Site;
-use App\Models\Performance;
-use Illuminate\Support\Collection;
 
 class OlaController extends Controller
 {
     public function index(Request $request)
-{
-    $tab  = $request->get('tab', 'AWOS');
-    $year = (int) $request->get('year', date('Y'));
+    {
+        // Mapping tab ke nama kategori di database
+        $tabMapping = [
+            'AWOS'        => 'AWOS',
+            'RADAR'       => 'RADAR',
+            'AWS DIGI'    => 'AWS DIGI',
+            'AWS POSMET'  => 'AWS Posmet & Rekayasa',
+            'AWS MARITIM' => 'AWS MARITIM',
+            'RASON'       => 'AWS Rasond',
+            'AAWS'        => 'AAWS',
+            'AWS'         => 'AWS',
+            'ARG'         => 'ARG',
+            'InaTEWS'     => 'InaTEWS',
+        ];
 
-    // cari kategori berdasarkan nama
-    $category = \App\Models\Category::where('name', $tab)->first();
+        $tab = $request->get('tab', 'rekapan');
+        $year = (int) $request->get('year', date('Y'));
 
-    $sites = $category
-        ? Site::where('category_id', $category->id)
-              ->with('satker')
-              ->orderBy('name')
-              ->get()
-        : collect();
+        // Ambil tipe OLA
+        $kategori = TipeKategori::where('nama_tipe', 'OLA')->first();
 
-    $siteIds = $sites->pluck('id')->toArray();
+        // Ambil daftar site sesuai tab
+        $sitesQuery = Site::with(['jenisAlat', 'siteSatkers.satker'])
+            ->orderBy('nama_site');
 
-    $performances = !empty($siteIds)
-        ? Performance::whereIn('site_id', $siteIds)
-                     ->where('year', $year)
-                     ->get()
-                     ->keyBy(function ($item) {
-                         return $item->site_id . '-' . $item->month;
-                     })
-        : collect();
+        if ($tab !== 'rekapan') {
+            $namaDb = $tabMapping[$tab] ?? $tab; // fallback
+            $sitesQuery->whereHas('jenisAlat', function ($q) use ($namaDb) {
+                $q->where('nama_jenis', $namaDb);
+            });
+        }
 
-    $years = Performance::select('year')
-                ->distinct()
-                ->orderBy('year', 'desc')
-                ->pluck('year')
-                ->toArray();
+        $sites = $sitesQuery->get();
 
-    if (empty($years)) {
-        $current = (int) date('Y');
-        $years   = range($current - 5, $current + 1);
-        rsort($years);
+        // Ambil data OLA sesuai tahun
+        $performances = $kategori
+            ? SlaOlaNilai::where('tipe_id', $kategori->id)
+                ->where('tahun', $year)
+                ->get()
+            : collect();
+
+        // Ambil daftar tahun
+        $years = SlaOlaNilai::select('tahun')
+            ->where('tipe_id', $kategori->id ?? 0)
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun')
+            ->toArray();
+
+        if (empty($years)) {
+            $current = (int) date('Y');
+            $years = range($current - 5, $current + 1);
+            rsort($years);
+        }
+
+        if (!$request->has('tab') || !$request->has('year')) {
+            return redirect()->route('admin.ola.index', [
+                'tab' => $tab,
+                'year' => $year,
+            ]);
+        }
+
+        // --- Hitung Rekapan --- //
+        $month = (int) $request->get('month', date('n'));
+        $month = null;
+        if ($tab === 'rekapan') {
+            $month = (int) $request->get('month', date('n'));
+        }
+
+        // mapping alat ke kategori
+        $kelompok = [
+            'Geofisika'   => ['InaTEWS'],
+            'Meteorologi' => ['AWOS', 'RADAR', 'AWS DIGI', 'AWS Posmet & Rekayasa', 'AWS MARITIM', 'AWS Rasond'],
+            'Klimatologi' => ['AAWS', 'AWS', 'ARG'],
+        ];
+
+        $rekapan = [];
+        if ($tab === 'rekapan') {
+            foreach ($kelompok as $kategoriNama => $alatList) {
+                $query = SlaOlaNilai::whereHas('site.jenisAlat', function ($q) use ($alatList) {
+                    $q->whereIn('nama_jenis', $alatList);
+                })
+                    ->where('tipe_id', $kategori->id ?? 0)
+                    ->where('tahun', $year);
+
+                if ($month) {
+                    $query->where('bulan', $month);
+                }
+
+                $rekapan[$kategoriNama] = $query->avg('persentase') ?? 0;
+            }
+        }
+
+        $rekapanDetail = [];
+        foreach ($kelompok as $kategoriNama => $alatList) {
+            foreach ($alatList as $alat) {
+                $query = SlaOlaNilai::whereHas('site.jenisAlat', function ($q) use ($alat) {
+                    $q->where('nama_jenis', $alat);
+                })
+                    ->where('tipe_id', $kategori->id ?? 0)
+                    ->where('tahun', $year)
+                    ->where('bulan', $month);
+
+                $jumlah = $query->count();
+                $persentase = $query->avg('persentase') ?? 0;
+
+                $rekapanDetail[$kategoriNama][] = [
+                    'nama'       => $alat,
+                    'jumlah'     => $jumlah,
+                    'persentase' => $persentase,
+                ];
+            }
+        }
+
+        return view('admin.ola', [
+            'tab'            => $tab,
+            'year'           => $year,
+            'month'          => $month,
+            'sites'          => $sites,
+            'performances'   => $performances,
+            'availableYears' => $years,
+            'rekapan'        => $rekapan,
+            'rekapanDetail'  => $rekapanDetail,
+        ]);
     }
 
-    return view('admin.ola', [
-        'tab'            => $tab,
-        'year'           => $year,
-        'sites'          => $sites,
-        'performances'   => $performances,
-        'availableYears' => $years,
-        'months'         => [
-            1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',
-            7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
-        ],
-    ]);
-}
-    // OlaController.php
-
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'site_id'    => 'required|exists:sites,id',
-        'year'       => 'required|integer',
-        'month'      => 'required|integer|min:1|max:12',
-        'percentage' => 'required|numeric|min:0|max:100',
-    ]);
-
-    // Insert kalau belum ada, update kalau sudah ada
-    \App\Models\Performance::updateOrCreate(
-        [
-            'site_id' => $validated['site_id'],
-            'year'    => $validated['year'],
-            'month'   => $validated['month'],
-        ],
-        [
-            'percentage' => $validated['percentage'],
-        ]
-    );
-
-    return redirect()->back()->with('success', 'Data berhasil disimpan!');
-}
-
-    public function update(Request $request, $id)
+    public function store(Request $request)
     {
-        $perf = Performance::findOrFail($id);
-
         $data = $request->validate([
             'site_id'    => 'required|exists:sites,id',
             'year'       => 'required|integer',
@@ -97,25 +146,43 @@ public function store(Request $request)
             'percentage' => 'required|numeric|min:0|max:100',
         ]);
 
-        $perf->update($data);
+        $kategori = TipeKategori::where('nama_tipe', 'OLA')->firstOrFail();
+        $site = Site::findOrFail($data['site_id']);
+
+        SlaOlaNilai::create([
+            'site_id'       => $site->id,
+            'jenis_alat_id' => $site->id_jenis_alat,
+            'tipe_id'       => $kategori->id,
+            'tahun'         => $data['year'],
+            'bulan'         => $data['month'],
+            'persentase'    => $data['percentage'],
+        ]);
 
         return redirect()->route('admin.ola.index', [
-            'tab'  => $request->get('tab', 'AWOS'),
+            'tab'  => $request->get('tab', 'rekapan'),
             'year' => $data['year'],
-        ])->with('success', 'Data berhasil diupdate.');
+        ])->with('success', 'Data OLA berhasil ditambahkan.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+          'percentage' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $nilai = SlaOlaNilai::findOrFail($id);
+        $nilai->update([
+            'persentase' => $data['percentage'],
+        ]);
+
+        return redirect()->back()->with('success', 'Data OLA berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $perf = Performance::findOrFail($id);
-        $tab  = request()->get('tab', 'AWOS');
-        $year = $perf->year;
+        $nilai = SlaOlaNilai::findOrFail($id);
+        $nilai->delete();
 
-        $perf->delete();
-
-        return redirect()->route('admin.ola.index', [
-            'tab'  => $tab,
-            'year' => $year,
-        ])->with('success', 'Data berhasil dihapus.');
+        return redirect()->back()->with('success', 'Data OLA berhasil dihapus.');
     }
 }

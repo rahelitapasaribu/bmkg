@@ -4,124 +4,185 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\SlaOlaNilai;
+use App\Models\TipeKategori;
 use App\Models\Site;
-use App\Models\Performance;
-use Illuminate\Support\Collection;
 
 class SlaController extends Controller
 {
-    // Mapping nama tab ke category_id (sesuaikan dengan DB-mu)
-    protected $categoryMap = [
-        'AWOS' => 16,
-        'RADAR' => 18,
-        'AWS' => 17,
-        'AWS Synoptic' => 19,
-        'AWS Maritim' => 20,
-        'AAWS' => 21,
-        'ARG' => 22,
-        'InaTEWS' => 23,
-    ];
-
 
     public function index(Request $request)
     {
-        $tab  = $request->get('tab', 'AWOS');
+
+        // Mapping tab ke nama kategori di database
+        $tabMapping = [
+            'AWOS'      => 'AWOS',
+            'RADAR'     => 'RADAR',
+            'AWS DIGI'  => 'AWS DIGI',
+            'AWS POSMET' => 'AWS Posmet & Rekayasa',
+            'AWS MARITIM' => 'AWS MARITIM',
+            'RASON'     => 'AWS Rasond',
+            'AAWS'      => 'AAWS',
+            'AWS'       => 'AWS',
+            'ARG'       => 'ARG',
+            'InaTEWS'   => 'InaTEWS',
+        ];
+
+        $tab = $request->get('tab', 'rekapan');
         $year = (int) $request->get('year', date('Y'));
 
-        // ambil category_id dari map
-        $categoryId = $this->categoryMap[$tab] ?? null;
+        // Ambil tipe SLA
+        $kategori = TipeKategori::where('nama_tipe', 'SLA')->first();
 
-        // ambil sites (dengan relasi satker) sesuai kategori; kalau tidak ada category -> empty collection
-        if ($categoryId) {
-            $sites = Site::where('category_id', $categoryId)
-                ->with('satker')
-                ->orderBy('name')
-                ->get();
-        } else {
-            $sites = collect();
+        // Ambil daftar site sesuai tab
+        $sitesQuery = Site::with(['jenisAlat', 'siteSatkers.satker'])
+            ->orderBy('nama_site');
+
+        if ($tab !== 'rekapan') {
+            $namaDb = $tabMapping[$tab] ?? $tab; // fallback kalau ga ada
+            $sitesQuery->whereHas('jenisAlat', function ($q) use ($namaDb) {
+                $q->where('nama_jenis', $namaDb);
+            });
         }
 
-        // ambil performances untuk sites di year ini
-        $siteIds = $sites->pluck('id')->toArray();
-        if (!empty($siteIds)) {
-            $performances = Performance::whereIn('site_id', $siteIds)
-                ->where('year', $year)
-                ->get();
-        } else {
-            $performances = collect();
-        }
+        $sites = $sitesQuery->get();
 
-        // availableYears (ambil distinct years dari table performance), jika kosong buat default range
-        $years = Performance::select('year')->distinct()->orderBy('year', 'desc')->pluck('year')->toArray();
+        // Ambil data SLA sesuai tahun
+        $performances = $kategori
+            ? SlaOlaNilai::where('tipe_id', $kategori->id)
+            ->where('tahun', $year)
+            ->get()
+            : collect();
+
+        // Ambil daftar tahun yang tersedia
+        $years = SlaOlaNilai::select('tahun')
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun')
+            ->toArray();
+
         if (empty($years)) {
             $current = (int) date('Y');
             $years = range($current - 5, $current + 1);
             rsort($years);
         }
 
-        // pastikan collections (blade mengandalkan ->where pada collections)
-        if (!($performances instanceof Collection)) {
-            $performances = collect($performances);
+        if (!$request->has('tab') || !$request->has('year')) {
+            return redirect()->route('admin.sla.index', [
+                'tab' => $tab,
+                'year' => $year,
+            ]);
+        }
+
+        // --- Hitung Rekapan --- //
+        $month = (int) $request->get('month', date('n'));
+        $month = null;
+        if ($tab === 'rekapan') {
+            $month = (int) $request->get('month', date('n'));
+        }
+
+        // mapping alat ke kategori
+        $kelompok = [
+            'Geofisika' => ['InaTEWS'],
+            'Meteorologi' => ['AWOS', 'RADAR', 'AWS DIGI', 'AWS Posmet & Rekayasa', 'AWS MARITIM', 'AWS Rasond'],
+            'Klimatologi' => ['AAWS', 'AWS', 'ARG'],
+        ];
+
+        $rekapan = [];
+        if ($tab === 'rekapan') {
+            foreach ($kelompok as $kategori => $alatList) {
+                $query = SlaOlaNilai::whereHas('site.jenisAlat', function ($q) use ($alatList) {
+                    $q->whereIn('nama_jenis', $alatList);
+                })
+                    ->where('tahun', $year);
+
+                if ($month) {
+                    $query->where('bulan', $month);
+                }
+
+                $rekapan[$kategori] = $query->avg('persentase') ?? 0;
+            }
+        }
+
+        $rekapanDetail = [];
+
+        foreach ($kelompok as $kategori => $alatList) {
+            foreach ($alatList as $alat) {
+                $query = SlaOlaNilai::whereHas('site.jenisAlat', function ($q) use ($alat) {
+                    $q->where('nama_jenis', $alat);
+                })
+                    ->where('tahun', $year)
+                    ->where('bulan', $month);
+
+                $jumlah = $query->count();
+                $persentase = $query->avg('persentase') ?? 0;
+
+                $rekapanDetail[$kategori][] = [
+                    'nama' => $alat,
+                    'jumlah' => $jumlah,
+                    'persentase' => $persentase,
+                ];
+            }
         }
 
         return view('admin.sla', [
-            'tab' => $tab,
-            'year' => $year,
-            'sites' => $sites,
-            'performances' => $performances,
+            'tab'            => $tab,
+            'year'           => $year,
+            'month'          => $month,
+            'sites'          => $sites,
+            'performances'   => $performances,
             'availableYears' => $years,
+            'rekapan'        => $rekapan,
+            'rekapanDetail'  => $rekapanDetail,
         ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'site_id' => 'required|exists:sites,id',
-            'year'    => 'required|integer',
-            'month'   => 'required|integer|min:1|max:12',
+            'site_id'    => 'required|exists:sites,id',
+            'year'       => 'required|integer',
+            'month'      => 'required|integer|min:1|max:12',
             'percentage' => 'required|numeric|min:0|max:100',
         ]);
 
-        // hindari duplicate per (site,year,month) --> updateOrCreate
-        Performance::updateOrCreate(
-            [
-                'site_id' => $data['site_id'],
-                'year'    => $data['year'],
-                'month'   => $data['month'],
-            ],
-            ['percentage' => $data['percentage']]
-        );
+        $kategori = TipeKategori::where('nama_tipe', 'SLA')->firstOrFail();
+        $site = Site::findOrFail($data['site_id']);
 
-        return redirect()->route('admin.sla.index', ['tab' => $request->get('tab', 'AWOS'), 'year' => $data['year']])
-            ->with('success', 'Data berhasil disimpan.');
+        SlaOlaNilai::create([
+            'site_id'       => $site->id,
+            'jenis_alat_id' => $site->id_jenis_alat,
+            'tipe_id'       => $kategori->id,
+            'tahun'         => $data['year'],
+            'bulan'         => $data['month'],
+            'persentase'    => $data['percentage'],
+        ]);
+
+        return redirect()->route('admin.sla.index', [
+            'tab'  => $request->get('tab', 'rekapan'),
+            'year' => $data['year'],
+        ])->with('success', 'Data SLA berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
     {
-        $perf = Performance::findOrFail($id);
-
         $data = $request->validate([
-            'site_id' => 'required|exists:sites,id',
-            'year'    => 'required|integer',
-            'month'   => 'required|integer|min:1|max:12',
             'percentage' => 'required|numeric|min:0|max:100',
         ]);
 
-        $perf->update($data);
+        $nilai = SlaOlaNilai::findOrFail($id);
+        $nilai->update([
+            'persentase' => $data['percentage'],
+        ]);
 
-        return redirect()->route('admin.sla.index', ['tab' => $request->get('tab', 'AWOS'), 'year' => $data['year']])
-            ->with('success', 'Data berhasil diupdate.');
+        return redirect()->back()->with('success', 'Data SLA berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $perf = Performance::findOrFail($id);
-        $tab = request()->get('tab', 'AWOS');
-        $year = $perf->year;
+        $nilai = SlaOlaNilai::findOrFail($id);
+        $nilai->delete();
 
-        $perf->delete();
-
-        return redirect()->route('admin.sla.index', ['tab' => $tab, 'year' => $year])
-            ->with('success', 'Data berhasil dihapus.');
+        return redirect()->back()->with('success', 'Data SLA berhasil dihapus.');
     }
 }

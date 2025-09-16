@@ -7,6 +7,7 @@
     <title>@yield('title', 'Landing Page')</title>
     <link rel="icon" type="png" href="{{ asset('images/Logo-BMKG.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 
 <body class="relative min-h-screen flex flex-col items-center justify-center bg-white">
@@ -63,8 +64,14 @@
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 font-semibold mb-2">Password</label>
-                    <input type="password" name="password" required
-                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                    <div class="relative">
+                        <input type="password" name="password" id="password" required
+                            class="w-full px-4 py-2 pr-12 border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                        <button type="button" onclick="togglePassword()" 
+                            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <i id="eyeIcon" class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex justify-between items-center">
                     <button type="button" onclick="closeModal()"
@@ -120,9 +127,24 @@
         function openModal() {
             document.getElementById("loginModal").style.display = "block";
         }
+        
         function closeModal() {
             document.getElementById("loginModal").style.display = "none";
         }
+        
+        function togglePassword() {
+            const passwordField = document.getElementById("password");
+            const eyeIcon = document.getElementById("eyeIcon");
+            
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                eyeIcon.className = "fas fa-eye";
+            } else {
+                passwordField.type = "password";
+                eyeIcon.className = "fas fa-eye-slash";
+            }
+        }
+        
         window.onclick = function(event) {
             let modal = document.getElementById("loginModal");
             if (event.target === modal) {

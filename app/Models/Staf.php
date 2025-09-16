@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Staf extends Model
 {
-    protected $table = 'staf'; // Nama tabel di database
+    use HasFactory;
+
+    protected $table = 'staf';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_satker',
@@ -16,13 +21,8 @@ class Staf extends Model
         'ppnpn_perempuan'
     ];
 
-    // Relasi: staf milik satu satker
     public function satker()
     {
         return $this->belongsTo(Satker::class, 'id_satker', 'id');
     }
-    public function staf()
-{
-    return $this->hasOne(Staf::class, 'id_satker');
-}
 }

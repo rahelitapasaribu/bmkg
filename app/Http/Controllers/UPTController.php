@@ -17,6 +17,8 @@ class UPTController extends Controller
                 'satker.longitude',
                 'provinsi.nama_provinsi'
             )
+            ->orderBy('provinsi.nama_provinsi', 'asc') 
+            ->orderBy('satker.nama_satker', 'asc')
             ->get();
 
         return view('upt', compact('upts'));

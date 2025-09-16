@@ -2,24 +2,48 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Site extends Model
 {
-    protected $fillable = ['category_id', 'merk', 'id_satker', 'name'];
+    use HasFactory;
 
-    public function category()
+    protected $table = 'sites';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
+
+    protected $fillable = [
+        'id_jenis_alat',
+        'nama_site',
+        'merk',
+        'tahun_pengadaan',
+    ];
+
+    public function jenisAlat()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(JenisAlat::class, 'id_jenis_alat', 'id');
     }
 
-    public function performance()
+    public function siteSatkers()
     {
-        return $this->hasMany(performance::class);
+        return $this->hasMany(SiteSatker::class, 'site_id', 'id');
+    }
+
+    public function slaOlaNilai()
+    {
+        return $this->hasMany(SlaOlaNilai::class, 'site_id', 'id');
     }
 
     public function satker()
     {
-        return $this->belongsTo(Satker::class, 'id_satker');
+        return $this->hasOneThrough(
+            Satker::class,
+            SiteSatker::class,
+            'site_id', // Foreign key on SiteSatker table
+            'id',      // Foreign key on Satker table
+            'id',      // Local key on Site table
+            'satker_id' // Local key on SiteSatker table
+        );
     }
 }

@@ -17,6 +17,6 @@ class StafController extends Controller
     public function show($id)
     {
         $staf = Staf::with('satker')->findOrFail($id);
-        return view('map', compact('staf'));
+        return view('staf.show', compact('staf'));
     }
 }

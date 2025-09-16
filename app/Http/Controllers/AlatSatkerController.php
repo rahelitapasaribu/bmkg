@@ -7,11 +7,10 @@ use Illuminate\Http\Request;
 
 class AlatSatkerController extends Controller
 {
-    // Menampilkan data alat + jumlah
+    // Menampilkan data alat satker + relasi jenis alat & kondisi
     public function index()
     {
-        // ambil data alat satker + relasi alat (nama) + jumlah
-        $alatSatker = AlatSatker::with('alat')->get();
+        $alatSatker = AlatSatker::with(['jenisAlat', 'kondisi', 'satker.provinsi'])->get();
 
         return view('map', compact('alatSatker'));
     }

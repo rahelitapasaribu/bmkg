@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Provinsi extends Model
+class TipeKategori extends Model
 {
     use HasFactory;
 
-    protected $table = 'provinsi';
+    protected $table = 'tipe_kategori';
     protected $primaryKey = 'id';
     public $timestamps = false;
 
-    protected $fillable = ['nama_provinsi'];
+    protected $fillable = ['nama_tipe'];
 
-    public function satkers()
+    public function slaOlaNilai()
     {
-        return $this->hasMany(Satker::class, 'id_provinsi', 'id');
+        return $this->hasMany(SlaOlaNilai::class, 'tipe_id', 'id');
     }
 }
