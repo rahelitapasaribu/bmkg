@@ -262,7 +262,9 @@
                 </table>
             </div>
         @endif
+
     </div>
+</div>
 
     {{-- Modal Tambah --}}
     <div id="createModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
@@ -303,6 +305,7 @@
             </form>
         </div>
     </div>
+</div>
 
     {{-- Modal Edit --}}
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
@@ -351,6 +354,7 @@
             </form>
         </div>
     </div>
+</div>
 
     {{-- Script Modal --}}
     <script>

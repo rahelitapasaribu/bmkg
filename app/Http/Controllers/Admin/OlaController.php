@@ -167,7 +167,7 @@ class OlaController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'percentage' => 'required|numeric|min:0|max:100',
+          'percentage' => 'required|numeric|min:0|max:100',
         ]);
 
         $nilai = SlaOlaNilai::findOrFail($id);
